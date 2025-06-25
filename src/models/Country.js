@@ -1,110 +1,94 @@
-const { DataTypes, Model, Op } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL database connection (PostgreSQL connection)
+const { Sequelize, DataTypes } = require('sequelize');
+const sequelize = require('../config/db'); // PostgreSQL connection
 
-class Country extends Model {
-  static init() {
-    super.init(
+const Country = sequelize.define('Country', {
+  id: {
+    type: DataTypes.BIGINT,            // ✅ BIGINT to match PostgreSQL BIGSERIAL
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  code: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  region_id: {
+    type: DataTypes.BIGINT,            // ✅ BIGINT to match PostgreSQL BIGINT
+    allowNull: true,
+  },
+  active: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  img: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+}, {
+  tableName: 'countries',
+  timestamps: false,
+});
+
+// Define model relationships via associate function
+Country.associate = (models) => {
+  Country.hasMany(models.CountryTranslation, { as: 'translations', foreignKey: 'country_id' });
+  Country.hasOne(models.CountryTranslation, { as: 'translation', foreignKey: 'country_id' });
+
+  Country.hasOne(models.City, { as: 'city', foreignKey: 'country_id' });
+  Country.hasMany(models.City, { as: 'cities', foreignKey: 'country_id' });
+
+  Country.hasOne(models.Area, { as: 'area', foreignKey: 'country_id' });
+  Country.hasMany(models.Area, { as: 'areas', foreignKey: 'country_id' });
+
+  Country.hasOne(models.DeliveryPrice, { as: 'deliveryPrice', foreignKey: 'country_id' });
+  Country.hasMany(models.DeliveryPrice, { as: 'deliveryPrices', foreignKey: 'country_id' });
+};
+
+// Define Scopes
+Country.addScope('active', {
+  where: {
+    active: true,
+  },
+});
+
+Country.addScope('filter', (filter, lang, defaultLocale) => {
+  return {
+    include: [
       {
-        id: {
-          type: DataTypes.INTEGER,
-          autoIncrement: true,
-          primaryKey: true,
-          allowNull: false,
-        },
-        code: {
-          type: DataTypes.STRING,
-          allowNull: true,
-        },
-        region_id: {
-          type: DataTypes.INTEGER,
-          allowNull: true,
-        },
-        active: {
-          type: DataTypes.BOOLEAN,
-          allowNull: false,
-          defaultValue: false,
-        },
-        img: {
-          type: DataTypes.STRING,
-          allowNull: true,
-        },
+        model: sequelize.models.CountryTranslation,
+        as: 'translation',
+        required: false,
+        where: lang ? {
+          [Sequelize.Op.or]: [
+            { locale: lang },
+            { locale: defaultLocale },
+          ],
+        } : {},
       },
       {
-        sequelize,
-        modelName: 'Country',
-        tableName: 'countries',
-        timestamps: false,
-        // Replicate Laravel's guarded behavior: only 'id' is protected
-        // Laravel's Sequelize doesn't have a direct "guarded" equivalent, but all fields except 'id' are
-// mass-assignable
-        // Casts: 'active' is BOOLEAN
-      }
-    );
-  }
-
-  // Traits (to be implemented separately as needed)
-  // Loadable: Custom trait for data-loading functionality
-  // Regions: Custom trait for region-related functionality
-  // Note: These traits are not implemented here as per "no additions" instruction
-  // Implement as separate utilities or include in a base class if needed
-
-  static associate(models) {
-    // Relationships
-    this.hasMany(models.CountryTranslation, { foreignKey: 'country_id', as: 'translations' });
-    this.hasOne(models.CountryTranslation, { foreignKey: 'country_id', as: 'translation' });
-    this.hasOne(models.City, { foreignKey: 'country_id', as: 'city' });
-    this.hasMany(models.City, { foreignKey: 'country_id', as: 'cities' });
-    this.hasOne(models.Area, { foreignKey: 'country_id', as: 'area' });
-    this.hasMany(models.Area, { foreignKey: 'country_id', as: 'areas' });
-    this.hasOne(models.DeliveryPrice, { foreignKey: 'country_id', as: 'deliveryPrice' });
-    this.hasMany(models.DeliveryPrice, { foreignKey: 'country_id', as: 'deliveryPrices' });
-  }
-
-  // Replicate Laravel's scopeActive
-  static active(query) {
-    return query.where({ active: true });
-  }
-
-  // Replicate Laravel's scopeFilter
-  static filter(query, filter) {
-    const isApiRoute = request().is('api/v1/rest/*');
-    const lang = request().query('lang');
-
-    query
-      .when(isApiRoute && lang, (q) => q.where({
-        '$translation.locale$': {
-          [Op.or]: [
-            { [Op.eq]: lang },
-            { [Op.eq]: models.Language.findOne({ where: { default: 1 } })?.locale || 'en' },
+        model: sequelize.models.CountryTranslation,
+        as: 'translations',
+        required: false,
+        where: filter.search ? {
+          [Sequelize.Op.or]: [
+            { title: { [Sequelize.Op.iLike]: `%${filter.search}%` } },
+            { id: filter.search },
           ],
-        },
-      }, {
-        include: [{ model: models.CountryTranslation, as: 'translation' }],
-      }))
-      .when(filter.code, (q, code) => q.where({ code }))
-      .when(filter.region_id, (q, regionId) => q.where({ region_id: regionId }))
-      .when(filter.has_price, (q) => q.where({}, {
-        include: [{ model: models.DeliveryPrice, as: 'deliveryPrice' }],
-      }))
-      .when(typeof filter.active !== 'undefined', (q) => q.where({ active: filter.active }))
-      .when(filter.search, (q, search) => q.where({
-        [Op.or]: [
-          { '$translations.title$': { [Op.like]: `%${search}%` } },
-          { '$translations.id$': search },
-        ],
-      }, {
-        include: [{
-          model: models.CountryTranslation,
-          as: 'translations',
-          attributes: ['id', 'country_id', 'locale', 'title'],
-        }],
-      }));
-
-    return query;
-  }
-}
-
-// Initialize the model
-Country.init();
+        } : {},
+        attributes: ['id', 'country_id', 'locale', 'title'],
+      },
+      {
+        model: sequelize.models.DeliveryPrice,
+        as: 'deliveryPrice',
+        required: filter.has_price || false,
+      },
+    ],
+    where: {
+      ...(filter.code && { code: filter.code }),
+      ...(filter.region_id && { region_id: filter.region_id }),
+      ...(typeof filter.active !== 'undefined' && { active: filter.active }),
+    },
+  };
+});
 
 module.exports = Country;

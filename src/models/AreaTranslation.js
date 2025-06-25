@@ -1,47 +1,40 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/db'); // PostgreSQL connection
 
-class AreaTranslation extends Model {
-  static init() {
-    super.init(
-      {
+class AreaTranslation extends Model {}
+
+AreaTranslation.init(
+    {
         id: {
-          type: DataTypes.INTEGER,
-          autoIncrement: true,
-          primaryKey: true,
-          allowNull: false,
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+            allowNull: false,
         },
         area_id: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
+            type: DataTypes.INTEGER,
+            allowNull: false,
         },
         locale: {
-          type: DataTypes.STRING,
-          allowNull: false,
+            type: DataTypes.STRING,
+            allowNull: false,
         },
         title: {
-          type: DataTypes.STRING,
-          allowNull: false,
+            type: DataTypes.STRING,
+            allowNull: false,
         },
-      },
-      {
+    },
+    {
         sequelize,
         modelName: 'AreaTranslation',
         tableName: 'area_translations',
-        timestamps: false, // Match Laravel's $timestamps = false
-        // Replicate Laravel's guarded behavior: only 'id' is protected
-        // Sequelize doesn't have direct "guarded" equivalent, but all fields except 'id' are mass-assignable
-      }
-    );
-  }
+        timestamps: false, // ✅ Laravel's $timestamps = false
+    }
+);
 
-  static associate(models) {
-    // Relationships
-    this.belongsTo(models.Area, { foreignKey: 'area_id', as: 'area' });
-  }
-}
-
-// Initialize the model
-AreaTranslation.init();
+// ✅ Relationships
+AreaTranslation.associate = (models) => {
+    AreaTranslation.belongsTo(models.Area, { foreignKey: 'area_id', as: 'area' });
+};
 
 module.exports = AreaTranslation;

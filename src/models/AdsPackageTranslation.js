@@ -1,55 +1,53 @@
 const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+const sequelize = require('../config/db');
 
-class AdsPackageTranslation extends Model {
-  static init() {
-    super.init(
-      {
-        id: {
-          type: DataTypes.INTEGER,
-          autoIncrement: true,
-          primaryKey: true,
-          allowNull: false,
-        },
-        ads_package_id: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
-        },
-        locale: {
-          type: DataTypes.STRING,
-          allowNull: false,
-        },
-        title: {
-          type: DataTypes.STRING,
-          allowNull: false,
-        },
-        description: {
-          type: DataTypes.STRING,
-          allowNull: false,
-        },
-        button_text: {
-          type: DataTypes.STRING,
-          allowNull: false,
-        },
-      },
-      {
-        sequelize,
-        modelName: 'AdsPackageTranslation',
-        tableName: 'ads_package_translations',
-        timestamps: false, // Match Laravel's $timestamps = false
-        // Replicate Laravel's guarded behavior: only 'id' is protected
-        // Sequelize doesn't have direct "guarded" equivalent, but all fields except 'id' are mass-assignable
-      }
-    );
+class AdsPackageTranslation extends Model {}
+
+AdsPackageTranslation.init(
+  {
+    id: {
+      type: DataTypes.BIGINT, // ✅ Match BIGSERIAL
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false,
+    },
+    ads_package_id: {
+      type: DataTypes.BIGINT,
+      allowNull: true, // ✅ PostgreSQL allows null
+    },
+    locale: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    title: {
+      type: DataTypes.STRING(191),
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING(255),
+      allowNull: true, // ✅ should be nullable
+    },
+    button_text: {
+      type: DataTypes.STRING(255),
+      allowNull: true, // ✅ should be nullable
+    },
+  },
+  {
+    sequelize,
+    modelName: 'AdsPackageTranslation',
+    tableName: 'ads_package_translations',
+    timestamps: false, // ✅ No created_at/updated_at in table
   }
+);
 
-  static associate(models) {
-    // Relationships
-    this.belongsTo(models.AdsPackage, { foreignKey: 'ads_package_id', as: 'adsPackage' });
-  }
-}
-
-// Initialize the model
-AdsPackageTranslation.init();
+// ✅ Associations
+AdsPackageTranslation.associate = (models) => {
+  AdsPackageTranslation.belongsTo(models.AdsPackage, {
+    foreignKey: 'ads_package_id',
+    as: 'adsPackage',
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  });
+};
 
 module.exports = AdsPackageTranslation;
