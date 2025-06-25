@@ -1,58 +1,89 @@
-const { DataTypes, Model, Op } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/db'); // PostgreSQL connection
 
-class Area extends Model {}
+const Area = sequelize.define('Area', {
+  id: {
+    type: DataTypes.BIGINT,      // ✅ BIGINT for PostgreSQL BIGSERIAL
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  active: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  region_id: {
+    type: DataTypes.BIGINT,      // ✅ BIGINT for PostgreSQL
+    allowNull: true,
+  },
+  country_id: {
+    type: DataTypes.BIGINT,      // ✅ BIGINT for PostgreSQL
+    allowNull: true,
+  },
+  city_id: {
+    type: DataTypes.BIGINT,      // ✅ BIGINT for PostgreSQL
+    allowNull: true,
+  },
+}, {
+  tableName: 'areas',
+  timestamps: false,
+});
 
-Area.init(
-    {
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-            allowNull: false,
-        },
-        active: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false,
-        },
-        region_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-        },
-        country_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-        },
-        city_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-        },
-    },
-    {
-        sequelize,
-        modelName: 'Area',
-        tableName: 'areas',
-        timestamps: false, // Match Laravel's $timestamps = false
-    }
-);
-
-// ✅ Relationships
+// Define model relationships via associate function
 Area.associate = (models) => {
-    Area.hasMany(models.AreaTranslation, { foreignKey: 'area_id', as: 'translations' });
-    Area.hasOne(models.AreaTranslation, { foreignKey: 'area_id', as: 'translation' });
-    Area.hasOne(models.DeliveryPrice, { foreignKey: 'area_id', as: 'deliveryPrice' });
-    Area.hasMany(models.DeliveryPrice, { foreignKey: 'area_id', as: 'deliveryPrices' });
+  Area.hasMany(models.AreaTranslation, { as: 'translations', foreignKey: 'area_id' });
+  Area.hasOne(models.AreaTranslation, { as: 'translation', foreignKey: 'area_id' });
+
+  Area.hasOne(models.DeliveryPrice, { as: 'deliveryPrice', foreignKey: 'area_id' });
+  Area.hasMany(models.DeliveryPrice, { as: 'deliveryPrices', foreignKey: 'area_id' });
 };
 
-// ✅ Scope: Active
-Area.scopeActive = () => {
-    return {
-        where: { active: true }
-    };
-};
+// Scopes
+Area.addScope('active', {
+  where: {
+    active: true,
+  },
+});
 
-// 🚩 Important: Laravel's `when` and `request` methods don't directly exist in Sequelize. 
-// You will need to write separate query builder functions in your service file instead of the static filter function as you tried.
+Area.addScope('filter', (filter, lang, defaultLocale) => {
+  return {
+    include: [
+      {
+        model: sequelize.models.AreaTranslation,
+        as: 'translation',
+        required: false,
+        where: lang ? {
+          [Sequelize.Op.or]: [
+            { locale: lang },
+            { locale: defaultLocale },
+          ],
+        } : {},
+      },
+      {
+        model: sequelize.models.AreaTranslation,
+        as: 'translations',
+        required: false,
+        where: filter.search ? {
+          [Sequelize.Op.or]: [
+            { title: { [Sequelize.Op.iLike]: `%${filter.search}%` } },
+            { id: filter.search },
+          ],
+        } : {},
+        attributes: ['id', 'area_id', 'locale', 'title'],
+      },
+      {
+        model: sequelize.models.DeliveryPrice,
+        as: 'deliveryPrice',
+        required: filter.has_price || false,
+      },
+    ],
+    where: {
+      ...(filter.region_id && { region_id: filter.region_id }),
+      ...(filter.country_id && { country_id: filter.country_id }),
+      ...(filter.city_id && { city_id: filter.city_id }),
+      ...(typeof filter.active !== 'undefined' && { active: filter.active }),
+    },
+  };
+});
 
 module.exports = Area;
