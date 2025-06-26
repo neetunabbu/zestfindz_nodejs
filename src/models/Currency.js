@@ -15,7 +15,7 @@ class Currency extends Model {
       return cache.data;
     }
     const currencies = await this.findAll({
-      order: [['default', 'DESC']]
+      order: [['is_default', 'DESC']]
     });
     cache.data = currencies;
     cache.timestamp = now;
@@ -25,7 +25,7 @@ class Currency extends Model {
 
 Currency.init({
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.BIGINT,  // match BIGSERIAL
     primaryKey: true,
     autoIncrement: true,
     allowNull: false
@@ -35,18 +35,20 @@ Currency.init({
     allowNull: true
   },
   title: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.STRING(191),
     allowNull: false
   },
   rate: {
-    type: DataTypes.DOUBLE,
-    allowNull: false
+    type: DataTypes.DECIMAL(9, 2),  // match NUMERIC(9,2)
+    allowNull: false,
+    defaultValue: 1.00
   },
   position: {
-    type: DataTypes.STRING(255),
-    allowNull: false
+    type: DataTypes.STRING(10),
+    allowNull: false,
+    defaultValue: 'after'
   },
-  default: {
+  is_default: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false
@@ -54,7 +56,7 @@ Currency.init({
   active: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: false
+    defaultValue: true
   },
   created_at: {
     type: DataTypes.DATE,
@@ -73,7 +75,7 @@ Currency.init({
   freezeTableName: true,
   paranoid: false,
   defaultScope: {
-    attributes: { exclude: [] } // No guarded fields except id, handled by primaryKey
+    attributes: { exclude: [] }
   }
 });
 
