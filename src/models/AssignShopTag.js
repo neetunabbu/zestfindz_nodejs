@@ -1,41 +1,30 @@
 const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+const sequelize = require('../config/db');
 
-class AssignShopTag extends Model {}
+class AssignShopTag extends Model {
+  static associate(models) {
+    this.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
+    this.belongsTo(models.ShopTag, { foreignKey: 'shop_tag_id', as: 'shopTag' });
+  }
+}
 
 AssignShopTag.init(
-    {
-        shop_tag_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        shop_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        created_at: {
-            type: DataTypes.DATE,
-            allowNull: true,
-        },
-        updated_at: {
-            type: DataTypes.DATE,
-            allowNull: true,
-        },
+  {
+    shop_tag_id: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
     },
-    {
-        sequelize,
-        modelName: 'AssignShopTag',
-        tableName: 'assign_shop_tags',
-        timestamps: true, // ✅ Sequelize will automatically manage created_at and updated_at
-        createdAt: 'created_at',
-        updatedAt: 'updated_at',
-    }
+    shop_id: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
+  },
+  {
+    sequelize,
+    modelName: 'AssignShopTag',
+    tableName: 'assign_shop_tags',
+    timestamps: false,
+  }
 );
-
-// ✅ Relationships
-AssignShopTag.associate = (models) => {
-    AssignShopTag.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
-    AssignShopTag.belongsTo(models.ShopTag, { foreignKey: 'shop_tag_id', as: 'shopTag' });
-};
 
 module.exports = AssignShopTag;
