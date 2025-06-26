@@ -11,28 +11,26 @@ BlogCategory.init(
       primaryKey: true,
       allowNull: false,
     },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
   },
   {
     sequelize,
     modelName: 'BlogCategory',
     tableName: 'blog_categories',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    timestamps: false,  // disable timestamps to match your current table
   }
 );
 
 // ✅ Associations
 BlogCategory.associate = (models) => {
-  BlogCategory.hasMany(models.Blog, { foreignKey: 'category_id', sourceKey: 'id', as: 'blogs' });
+  BlogCategory.hasMany(models.Blog, {
+    foreignKey: 'category_id',
+    sourceKey: 'id',
+    as: 'blogs',
+  });
 };
 
 module.exports = BlogCategory;

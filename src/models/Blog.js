@@ -12,29 +12,45 @@ Blog.init(
       allowNull: false,
     },
     uuid: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(36),
       allowNull: false,
     },
     user_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.SMALLINT,
       allowNull: false,
+      defaultValue: 1,
     },
     published_at: {
-      type: DataTypes.STRING,
+      type: DataTypes.DATE,
       allowNull: true,
     },
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false,
+      defaultValue: true,
     },
     img: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(191),
       allowNull: true,
+    },
+    r_count: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0,
+    },
+    r_avg: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0,
+    },
+    r_sum: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0,
     },
     created_at: {
       type: DataTypes.DATE,
@@ -44,15 +60,7 @@ Blog.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    r_count: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    r_avg: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    r_sum: {
+    category_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
@@ -64,11 +72,6 @@ Blog.init(
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    getterMethods: {
-      typeLabel() {
-        return this.type === '2' ? 'notification' : 'blog';
-      }
-    }
   }
 );
 
