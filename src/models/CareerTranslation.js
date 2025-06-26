@@ -1,55 +1,51 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/db'); // PostgreSQL connection
 
-class CareerTranslation extends Model {
-  static init() {
-    super.init(
-      {
-        id: {
-          type: DataTypes.INTEGER,
-          autoIncrement: true,
-          primaryKey: true,
-          allowNull: false,
-        },
-        career_id: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
-        },
-        locale: {
-          type: DataTypes.STRING,
-          allowNull: false,
-        },
-        title: {
-          type: DataTypes.STRING,
-          allowNull: false,
-        },
-        description: {
-          type: DataTypes.STRING,
-          allowNull: true,
-        },
-        address: {
-          type: DataTypes.JSON,
-          allowNull: true,
-        },
-      },
-      {
-        sequelize,
-        modelName: 'CareerTranslation',
-        tableName: 'career_translations',
-        timestamps: false, // Match Laravel's $timestamps = false
-        // Replicate Laravel's guarded behavior: only 'id' is protected
-        // Sequelize doesn't have direct "guarded" equivalent, but all fields except 'id' are mass-assignable
-        // Casts: 'address' is JSON
-      }
-    );
-  }
+class CareerTranslation extends Model {}
 
-  static associate(models) {
-    // No relationships defined in the Laravel model
+CareerTranslation.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false,
+    },
+    career_id: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
+    locale: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    title: {
+      type: DataTypes.STRING(191),
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT, // ✅ corrected from STRING to TEXT
+      allowNull: true,
+    },
+    address: {
+      type: DataTypes.JSONB, // ✅ PostgreSQL JSONB type
+      allowNull: true,
+    },
+  },
+  {
+    sequelize,
+    modelName: 'CareerTranslation',
+    tableName: 'career_translations',
+    timestamps: false, // ✅ No created_at / updated_at in table
   }
-}
+);
 
-// Initialize the model
-CareerTranslation.init();
+// ✅ Associations if needed later
+CareerTranslation.associate = (models) => {
+  CareerTranslation.belongsTo(models.Career, {
+    foreignKey: 'career_id',
+    as: 'career',
+  });
+};
 
 module.exports = CareerTranslation;
