@@ -3,11 +3,10 @@ const sequelize = require('../config/db'); // PostgreSQL connection
 
 class Banner extends Model {}
 
-// ✅ Model Definition
 Banner.init(
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,  // 🔄 Match BIGSERIAL
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
@@ -16,6 +15,11 @@ Banner.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'banner',  // ✅ Match DB default
+    },
     img: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -23,11 +27,16 @@ Banner.init(
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false,
+      defaultValue: true,  // ✅ Match DB default
     },
-    type: {
-      type: DataTypes.STRING,
+    clickable: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
+      defaultValue: true,  // ✅ Match DB default
+    },
+    input: {
+      type: DataTypes.INTEGER,
+      allowNull: true,  // ✅ No NOT NULL constraint in DB
     },
     created_at: {
       type: DataTypes.DATE,
@@ -37,18 +46,9 @@ Banner.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    clickable: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    input: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     shop_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+      type: DataTypes.BIGINT,
+      allowNull: true,  // ✅ No NOT NULL constraint in DB
     },
   },
   {

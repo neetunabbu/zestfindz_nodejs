@@ -20,15 +20,15 @@ BlogTranslation.init(
       allowNull: false,
     },
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(191), // matches VARCHAR(191)
       allowNull: false,
     },
     short_desc: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(191),
       allowNull: true,
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT, // ✅ fixed: TEXT to match PostgreSQL table
       allowNull: true,
     },
   },
@@ -36,13 +36,13 @@ BlogTranslation.init(
     sequelize,
     modelName: 'BlogTranslation',
     tableName: 'blog_translations',
-    timestamps: false, // ✅ Laravel's $timestamps = false
+    timestamps: false, // as per your Laravel $timestamps = false
   }
 );
 
-// ✅ Associations (none defined in Laravel, but can add if needed)
+// ✅ Associations (optional)
 BlogTranslation.associate = (models) => {
-  // Example if you want: BlogTranslation.belongsTo(models.Blog, { foreignKey: 'blog_id', as: 'blog' });
+  BlogTranslation.belongsTo(models.Blog, { foreignKey: 'blog_id', as: 'blog' });
 };
 
 module.exports = BlogTranslation;
