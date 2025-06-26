@@ -6,13 +6,13 @@ class BannerTranslation extends Model {}
 BannerTranslation.init(
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT, // should match BIGSERIAL
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
     banner_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT, // match your BIGINT column
       allowNull: false,
     },
     locale: {
@@ -20,15 +20,15 @@ BannerTranslation.init(
       allowNull: false,
     },
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(191),
       allowNull: false,
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT, // fix: TEXT in db, so TEXT here
       allowNull: true,
     },
     button_text: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
   },
@@ -36,11 +36,11 @@ BannerTranslation.init(
     sequelize,
     modelName: 'BannerTranslation',
     tableName: 'banner_translations',
-    timestamps: false, // Match Laravel's $timestamps = false
+    timestamps: false, // Match Laravel $timestamps = false
   }
 );
 
-// ✅ Associations (if needed later)
+// ✅ Associations
 BannerTranslation.associate = (models) => {
   BannerTranslation.belongsTo(models.Banner, {
     foreignKey: 'banner_id',
