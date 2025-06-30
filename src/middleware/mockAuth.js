@@ -3,7 +3,7 @@
 module.exports = (req, res, next) => {
   req.user = {
     id: 1,
-    roles: [{ name: 'admin' }] // or 'manager'
+    roles: [{ name: 'admin' }] // or [{ name: 'manager' }]
   };
   console.log('🔐 mockAuth attached user:', req.user);
   next();

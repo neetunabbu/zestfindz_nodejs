@@ -6,9 +6,19 @@ const app = express();
 // ✅ Middleware
 app.use(express.json());
 
-// ✅ Mock Auth Middleware for Testing (you can replace with JWT later)
+// ✅ Home Route
+app.get('/', (req, res) => {
+    res.send('✅ Welcome to Zestfindz API');
+});
+
+// ✅ User Routes
+const adminUserRoutes = require('./src/routes/api/v1/Dashboard/admin/user.routes');
+const adminRoleRoutes = require('./src/routes/api/v1/Dashboard/admin/role.routes');
+const authRoutes = require("./src/routes/auth.js");
+
+// ✅ Mock Auth Middleware for Testing (apply only to admin routes)
 const mockAuth = require('./src/middleware/mockAuth');
-app.use((req, res, next) => {
+app.use('/api/admin', (req, res, next) => {
     try {
         mockAuth(req, res, () => {
             // Log to verify that user is attached by mockAuth
@@ -21,18 +31,22 @@ app.use((req, res, next) => {
     }
 });
 
-// ✅ Home Route
-app.get('/', (req, res) => {
-    res.send('✅ Welcome to Zestfindz API');
+// Mount admin routes after mockAuth
+app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/roles', adminRoleRoutes);
+
+// Auth routes (no mockAuth)
+app.use('/api/auth', authRoutes);
+
+app.get('/test', (req, res) => {
+    console.log("testing");
+    res.json({ message: '✅ Test route is working!' });
 });
 
-// ✅ User Routes
-const adminUserRoutes = require('./src/routes/api/v1/Dashboard/admin/user.routes');
-app.use('/api/admin/users', adminUserRoutes);
-
-// ✅ Role Routes
-const adminRoleRoutes = require('./src/routes/api/v1/Dashboard/admin/role.routes');
-app.use('/api/admin/roles', adminRoleRoutes);
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ message: 'Route not found' });
+});
 
 // ✅ Export the app
 module.exports = app;

@@ -39,8 +39,11 @@ router.post('/', userController.store);
 router.get('/:uuid', userController.show);
 router.put('/:uuid', userController.update);
 
-// Delete Specific Users
+// Delete Specific Users (bulk delete)
 router.delete('/delete', userController.destroy);
+
+// Delete Specific Users
+router.delete('/:uuid', userController.destroy);
 
 // Roles List (Assumed simple GET call)
 // router.get('/roles', roleController.listRoles); // You can change the method name

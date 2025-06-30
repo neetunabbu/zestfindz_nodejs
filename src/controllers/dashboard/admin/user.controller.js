@@ -74,9 +74,22 @@ module.exports = {
     // Delete Users
     async destroy(req, res) {
         try {
-            await userService.deleteUsers(req.body.ids);
-
-            res.json({ status: true, message: 'Users deleted successfully' });
+            // Support both: DELETE /:uuid and DELETE /delete with body.ids
+            if (req.params.uuid) {
+                // Single delete by UUID
+                const user = await userService.findUserByUUID(req.params.uuid);
+                if (!user) {
+                    return res.status(404).json({ status: false, message: 'User not found' });
+                }
+                await user.destroy();
+                return res.json({ status: true, message: 'User deleted successfully' });
+            } else if (req.body.ids) {
+                // Bulk delete by IDs
+                await userService.deleteUsers(req.body.ids);
+                return res.json({ status: true, message: 'Users deleted successfully' });
+            } else {
+                return res.status(400).json({ status: false, message: 'No user specified for deletion' });
+            }
         } catch (error) {
             res.status(500).json({ status: false, message: error.message });
         }
@@ -92,12 +105,18 @@ module.exports = {
             }
 
             // Example seller check (you can update based on your seller table)
-            if (user.role === 'seller' || req.body.role === 'seller') {
+            if (req.body.role === 'seller') {
                 return res.status(400).json({ status: false, message: 'Role cannot be changed to seller.' });
             }
 
-            user.role = req.body.role;
-            await user.save();
+            // Find the role by name
+            const Role = require('../../../models/Role');
+            const role = await Role.findOne({ where: { name: req.body.role } });
+            if (!role) {
+                return res.status(400).json({ status: false, message: 'Role not found.' });
+            }
+
+            await user.setRoles([role]); // setRoles is a Sequelize method for many-to-many
 
             res.json({ status: true, message: 'Role updated successfully', data: user });
         } catch (error) {
