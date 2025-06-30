@@ -21,7 +21,3 @@ yarn-error.log
 .github/workflows/main.yml
 rr
 .rr.yaml
-node_modules/.package-lock.json
-package-lock.json
-package.json
-*.json
