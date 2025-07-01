@@ -1,3 +1,4 @@
+// src\routes\api\v1\Dashboard\admin\role.routes.js
 const express = require('express');
 const router = express.Router();
 const roleController = require('../../../../../controllers/dashboard/admin/role.controller');

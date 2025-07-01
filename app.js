@@ -32,8 +32,8 @@ app.use('/api/admin', (req, res, next) => {
 });
 
 // Mount admin routes after mockAuth
-app.use('/api/admin/users', adminUserRoutes);
-app.use('/api/admin/roles', adminRoleRoutes);
+app.use('/api/admin', adminUserRoutes);
+app.use('/api/admin', adminRoleRoutes);
 
 // Auth routes (no mockAuth)
 app.use('/api/auth', authRoutes);

@@ -1,3 +1,4 @@
+//zestfindz_nodejs\scripts\seedRoles.js
 const Role = require('../src/models/Role');
 const sequelize = require('../src/config/db');
 
