@@ -35,4 +35,15 @@ const Role = sequelize.define('Role', {
   updatedAt: 'updated_at'         // ✅ map Sequelize's updatedAt to DB's updated_at
 });
 
+Role.associate = (models) => {
+  Role.belongsToMany(models.User, {
+    as: 'users',
+    through: 'model_has_roles', // or 'role_user'
+    foreignKey: 'role_id',
+    otherKey: 'model_id',
+    constraints: false,
+    scope: { model_type: 'User' }
+  });
+};
+
 module.exports = Role;

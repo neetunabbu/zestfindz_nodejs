@@ -20,52 +20,24 @@ const User = sequelize.define('User', {
   my_referral: { type: DataTypes.STRING, defaultValue: 'YmbFrKPu' },
   referral: { type: DataTypes.STRING },
   firebase_token: { type: DataTypes.JSON },
-  location: { type: DataTypes.STRING },
+  // location: { type: DataTypes.STRING },
   r_count: { type: DataTypes.DOUBLE, defaultValue: 0 },
   r_avg: { type: DataTypes.DOUBLE, defaultValue: 0 },
   r_sum: { type: DataTypes.DOUBLE, defaultValue: 0 },
   o_count: { type: DataTypes.DOUBLE, defaultValue: 0 },
   o_sum: { type: DataTypes.DOUBLE, defaultValue: 0 },
   remember_token: { type: DataTypes.STRING },
-  razorpay_customer_id: { type: DataTypes.STRING },
+  // razorpay_customer_id: { type: DataTypes.STRING },
   created_at: { type: DataTypes.DATE },
   updated_at: { type: DataTypes.DATE },
   currency_id: { type: DataTypes.BIGINT },
-  lang: { type: DataTypes.STRING },
+  lang: { type: DataTypes.STRING,  },
 }, {
   tableName: 'users',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
 });
-
-// ✅ Relationships (leave as-is if other models already declared properly)
-User.hasMany(sequelize.models.Gallery, { as: 'galleries', foreignKey: 'user_id' });
-User.hasMany(sequelize.models.Invitation, { as: 'invitations', foreignKey: 'user_id' });
-User.hasOne(sequelize.models.Invitation, { as: 'invite', foreignKey: 'user_id' });
-User.belongsToMany(sequelize.models.Banner, { as: 'likes', through: sequelize.models.Like, foreignKey: 'user_id' });
-User.hasMany(sequelize.models.Review, { as: 'reviews', foreignKey: 'user_id' });
-User.hasMany(sequelize.models.Review, { as: 'assignReviews', foreignKey: 'assignable_id', scope: { assignable_type: 'User' } });
-User.belongsToMany(sequelize.models.Notification, { as: 'notifications', through: sequelize.models.NotificationUser, foreignKey: 'user_id', otherKey: 'notification_id' });
-User.hasMany(sequelize.models.Order, { as: 'orders', foreignKey: 'user_id' });
-User.hasMany(sequelize.models.Order, { as: 'deliveryManOrders', foreignKey: 'deliveryman_id' });
-User.hasOne(sequelize.models.Wallet, { as: 'wallet', foreignKey: 'user_id' });
-User.hasMany(sequelize.models.Transaction, { as: 'transactions', foreignKey: 'user_id' });
-User.hasMany(sequelize.models.SocialProvider, { as: 'socialProviders', foreignKey: 'user_id' });
-User.hasMany(sequelize.models.PersonalAccessToken, { as: 'tokens', foreignKey: 'tokenable_id', scope: { tokenable_type: 'User' } });
-User.hasMany(sequelize.models.PaymentProcess, { as: 'paymentProcess', foreignKey: 'user_id' });
-User.hasOne(sequelize.models.UserPoint, { as: 'point', foreignKey: 'user_id' });
-User.hasMany(sequelize.models.PointHistory, { as: 'pointHistory', foreignKey: 'user_id' });
-User.hasOne(sequelize.models.DeliveryManSetting, { as: 'deliveryManSetting', foreignKey: 'user_id' });
-User.hasOne(sequelize.models.UserAddress, { as: 'address', foreignKey: 'user_id' });
-User.hasMany(sequelize.models.UserAddress, { as: 'addresses', foreignKey: 'user_id' });
-User.belongsTo(sequelize.models.Currency, { as: 'currency', foreignKey: 'currency_id' });
-User.hasOne(sequelize.models.EmailSubscription, { as: 'emailSubscription', foreignKey: 'user_id' });
-User.hasOne(sequelize.models.UserActivity, { as: 'activity', foreignKey: 'user_id' });
-User.hasMany(sequelize.models.UserActivity, { as: 'activities', foreignKey: 'user_id' });
-User.hasOne(sequelize.models.Shop, { as: 'shop', foreignKey: 'user_id' });
-User.belongsToMany(sequelize.models.Role, { as: 'roles', through: sequelize.models.RoleUser, foreignKey: 'user_id' });
-User.belongsToMany(sequelize.models.Permission, { as: 'permissions', through: sequelize.models.PermissionUser, foreignKey: 'user_id' });
 
 // ✅ Custom methods
 User.prototype.isOnline = async function () {
@@ -100,5 +72,18 @@ User.addScope('filter', (filter) => {
     order: [['id', 'desc']],
   };
 });
+
+// Associations
+User.associate = (models) => {
+  User.belongsToMany(models.Role, {
+    as: 'roles',
+    through: 'model_has_roles', // or 'role_user' if that's your pivot
+    foreignKey: 'model_id',
+    otherKey: 'role_id',
+    constraints: false,
+    scope: { model_type: 'User' }
+  });
+  // ...other associations...
+};
 
 module.exports = User;

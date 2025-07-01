@@ -9,7 +9,7 @@ require('./src/models/Role'); // Register Role model
 // ✅ Import Middleware (for global registration if needed)
 require('./src/middleware/roleMiddleware'); // <-- Only imported, not applied globally
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
 app.listen(PORT, async () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);

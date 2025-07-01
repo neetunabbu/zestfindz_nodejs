@@ -20,7 +20,8 @@ module.exports = {
         return user;
     },
 
-    async deleteUsers(ids) {
-        return await User.destroy({ where: { id: ids } });
+    async deleteUsers(uuids) {
+        // Change from id: ids to uuid: uuids
+        return await User.destroy({ where: { uuid: uuids } });
     }
 };
