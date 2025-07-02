@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 
 // ✅ Create Sequelize instance
-const sequelize = new Sequelize('zestfindz', 'postgres', 'Kumar@2000', {
+const sequelize = new Sequelize('zestfindz_DB', 'postgres', '9700912007', {
     host: 'localhost',
     dialect: 'postgres',
     logging: false, // Disable SQL logging in terminal
