@@ -1,7 +1,7 @@
 1. User and Roles Functionalities Overview
-Users: Represent people who can log in and interact with the application.
-Roles: Define permissions or access levels (e.g., admin, editor, user).
-User-Role Association: Each user can have one or more roles (many-to-many relationship).
+| **Concept**                | **Description**                                                                                                                                      |
+|----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Users**                  | Represent people who can
 
 2. Code Structure and Flow
 a. Models
@@ -141,3 +141,15 @@ Use a router aggregator in routes/index.js.
 | Queues (Jobs)           | BullMQ, Agenda              |
 | Event Broadcasting      | Socket.io, EventEmitter     |
 | File Storage (local/s3) | Multer + fs/s3-sdk          |
+
+
+endpoint api 
+Table
+Step	Endpoint	        Method	Description
+1	/api/auth/register   	POST	Register user
+2	/api/auth/login	        POST	login user
+3	/api/auth/me	        GET	    authenticated user
+4	/api/admin/users	    GET	    List all users
+5	/api/admin/users/:uuid	GET	    Get user by UUID
+6	/api/admin/users/:uuid	PUT	    Update user
+7	/api/admin/users	    DELETE	Delete users (bulk)

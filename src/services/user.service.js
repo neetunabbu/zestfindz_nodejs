@@ -48,7 +48,20 @@ const createUser = async (data) => {
     }
   }
   const hashedPassword = await bcrypt.hash(data.password, 10);
-  const user = await User.create({ ...data, password: hashedPassword });
+//   const defaultRole = await Role.findOne({ where: { name: 'user' } });
+// if (defaultRole) {
+//   await ModelHasRole.create({
+//     role_id: defaultRole.id,
+//     model_type: 'User',
+//     model_id: user.id,
+//   });
+// }
+
+  const user = await User.create({ ...data, password: hashedPassword,
+  //    roles: [defaultRole] }, {
+  //   include: [{ model: Role, as: 'roles' }]
+  }
+);
   return { status: true, success: true, data: user };
 };
 
@@ -68,7 +81,7 @@ const deleteUsers = async (uuids) => {
 };
 
 const login = async ({ email, password }) => {
-  const user = await User.findOne({ where: { email }, include: ['roles'] });
+  const user = await User.findOne({ where: { email }, include: [{ model: db.Role, as: 'roles' }] });
   if (!user) throw new Error('Invalid credentials');
 
   const isMatch = await bcrypt.compare(password, user.password);

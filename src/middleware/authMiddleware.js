@@ -6,9 +6,7 @@ module.exports = async (req, res, next) => {
   const authHeader = req.headers.authorization; 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Unauthorized' }); 
-    console.log("Incoming Token:", req.headers.authorization);
-console.log("Decoded Token:", decoded);
-console.log("Loaded  User:", user?.email);
+  
   }
 
   try {

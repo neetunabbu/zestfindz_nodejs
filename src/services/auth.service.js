@@ -1,6 +1,7 @@
 // ✅ auth.service.js
 const UserService = require('./user.service');
-const { User } = require('../models');
+import db from '../models/index.js';
+const { User, Role } = db;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const logger = require('../config/logger');
@@ -25,10 +26,12 @@ const UserResource = (userInstance) => {
     phone: userInstance.phone,
     img: userInstance.img,
     active: userInstance.active,
+    roles: userInstance.roles?.map(r => r.name) || [],
     created_at: userInstance.createdAt,
     updated_at: userInstance.updatedAt,
   };
 };
+
 
 class AuthService {
   constructor() {
@@ -52,7 +55,7 @@ class AuthService {
       if (!serviceResult.status || !serviceResult.success) {
         return serviceResult;
       }
-
+    
       const user = serviceResult.data;
       const JWT_SECRET = process.env.JWT_SECRET || 'your-very-secure-secret-key-for-dev';
       const userPayload = { id: user.id, uuid: user.uuid, email: user.email };
@@ -82,9 +85,15 @@ class AuthService {
 
   async login(email, password) {
     try {
-      const user = await User.findOne({ 
+        const user = await User.findOne({
         where: { email },
-        include: ['roles']
+        include: [{
+          model: Role,
+          as: 'roles',
+          through: {
+            where: { model_type: 'admin' }
+          }
+        }]
       });
 
       if (!user) {
@@ -101,11 +110,12 @@ class AuthService {
       }
 
       const JWT_SECRET = process.env.JWT_SECRET || 'your-very-secure-secret-key-for-dev';
-      const userPayload = { 
-        id: user.id, 
-        uuid: user.uuid, 
+      const userPayload = {
+        id: user.id,
+        uuid: user.uuid,
         email: user.email,
-        roles: user.roles?.map(r => r.name) || []
+        roles: user.roles?.map(r => r.name)
+
       };
       const accessToken = jwt.sign(userPayload, JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' });
 

@@ -215,7 +215,8 @@ const { User } = require('../../../models');
 module.exports = {
   getUsers: async (req, res) => {
     try {
-      const users = await User.findAll({ include: ['roles'] });
+      // const users = await User.findAll({ include: ['roles'] });
+      const users = await User.findAll();
       res.json(users);
     } catch (error) {
       console.error('getUsers error:', error);
@@ -238,7 +239,7 @@ module.exports = {
   getUserByUUID: async (req, res) => {
     try {
       const user = await userService.findUserByUUID(req.params.uuid);
-      if (!user) return res.status(404).json({ message: 'User not found' });
+      // if (!user) return res.status(404).json({ message: 'User not found' });
       res.json(user);
     } catch (err) {
       res.status(500).json({ message: err.message });
@@ -248,7 +249,7 @@ module.exports = {
   updateUser: async (req, res) => {
     try {
       const user = await userService.updateUser(req.params.uuid, req.body);
-      if (!user) return res.status(404).json({ message: 'User not found' });
+      // if (!user) return res.status(404).json({ message: 'User not found' });
       res.json(user);
     } catch (err) {
       res.status(500).json({ message: err.message });
@@ -264,3 +265,5 @@ module.exports = {
     }
   }
 };
+
+// app.use('/api/admin/users', adminUserRoutes);

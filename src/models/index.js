@@ -1,30 +1,47 @@
-
-
 // src/models/index.js
+const fs = require('fs');
+const path = require('path');
 const Sequelize = require('sequelize');
-const sequelize = require('../config/db');
+const basename = path.basename(__filename);
+const config = require('../config/db'); // adjust as needed
+const db = {};
 
-const User = require('./User');
-const Role = require('./Role');
-const ModelHasRole = require('./modelHasRole');
+const sequelize = config;
 
-// Attach models to sequelize
-const db = {
-  sequelize,
-  Sequelize,
-  User,
-  Role,
-  ModelHasRole,
-};
+fs.readdirSync(__dirname)
+  .filter(file =>
+    file !== basename &&
+    file.endsWith('.js') &&
+    !file.startsWith('.')
+  )
+  .forEach(file => {
+    try {
+      const modelFile = require(path.join(__dirname, file));
+      if (typeof modelFile === 'function') {
+        const model = modelFile(sequelize, Sequelize.DataTypes);
+        db[model.name] = model;
+      } else {
+        console.warn(`⚠️  Skipped loading model "${file}" - not a function`);
+      }
+    } catch (err) {
+      // console.error(`❌ Failed to load model "${file}":`, err.message);
+    }
+  });
 
-// Run associate methods if defined
-Object.values(db).forEach(model => {
-  if (model.associate) {
-    model.associate(db);
+
+// Setup associations
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
   }
 });
 
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
 module.exports = db;
+
+
 
 // src\models\index.js
 // const fs = require('fs');

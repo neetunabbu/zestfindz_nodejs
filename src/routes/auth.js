@@ -12,4 +12,9 @@ router.post('/login', authController.ensureSession, authController.login);
 // Protected route example
 router.get('/me', authController.ensureSession, authController.me);
 
+//   me(req, res) {
+//     if (!req.session || !req.session.userId) return res.status(401).json({ message: 'Not authenticated' });
+//     res.json({ message: 'You are authenticated', userId: req.session.userId });
+//   }
+
 module.exports = router;
