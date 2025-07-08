@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
-const config = require('../config/db'); // adjust as needed
+const config = require('../config/db');
 const db = {};
 
 const sequelize = config;
@@ -35,6 +35,7 @@ Object.keys(db).forEach(modelName => {
     db[modelName].associate(db);
   }
 });
+console.log('Loaded models:', Object.keys(db));
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

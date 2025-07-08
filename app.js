@@ -38,7 +38,14 @@ app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin', adminRoleRoutes);
 
 // Auth routes (no mockAuth)
-app.use('/api/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes);
+
+// User phone/OTP login routes
+const userLoginRoutes = require('./src/routes/api/v1/userLogin.routes');
+app.use('/api/v1/auth', userLoginRoutes);
+
+const restRoutes = require('./src/routes/api/v1/rest.routes');
+app.use('/api/v1/rest', restRoutes);
 
 app.get('/test', (req, res) => {
     console.log("testing");
