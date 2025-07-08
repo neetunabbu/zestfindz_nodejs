@@ -15,7 +15,7 @@ app.listen(PORT, async () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
 
     try {
-        await sequelize.sync({ force: true });
+        await sequelize.sync();
         console.log('✅ Database synced successfully');
     } catch (error) {
         console.error('❌ Database sync failed:', error);
