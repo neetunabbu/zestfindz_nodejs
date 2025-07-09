@@ -1,5 +1,3 @@
-// D:\zestfindz\server.js
- 
 const app = require('./app');
 const sequelize = require('./src/config/db');
  
