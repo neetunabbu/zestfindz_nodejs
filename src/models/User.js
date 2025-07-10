@@ -1,4 +1,3 @@
-// src/models/User.js
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true, allowNull: false },
@@ -35,31 +34,36 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: 'created_at',
     updatedAt: 'updated_at',
   });
-// ✅ Helper Method
+
+  // ✅ Helper method to get full name
   User.prototype.getFullName = function () {
     return `${this.firstname} ${this.lastname || ''}`.trim();
   };
 
-  // ✅ Association Setup
+  // ✅ Define associations
   User.associate = (models) => {
-  User.belongsToMany(models.Role, {
-    as: 'roles',
-    through: {
-      model: models.ModelHasRole,
-      scope: {
-        model_type: 'User',
+    User.belongsToMany(models.Role, {
+      as: 'roles',
+      through: {
+        model: models.ModelHasRole,
+        scope: {
+          model_type: 'User',
+        },
       },
-    },
-    foreignKey: 'model_id',
-    otherKey: 'role_id',
-    constraints: false,
-  });
-  // // User model
-  // User.hasOne(CustomerVerify, { foreignKey: 'user_id' });
-  // User.hasMany(ReferalZestfindz, { foreignKey: 'user_id' });
+      foreignKey: 'model_id',
+      otherKey: 'role_id',
+      constraints: false,
+    });
 
-};
+    // If you want to enable these later:
+    User.hasOne(models.CustomerVerify, { foreignKey: 'user_id' });
+    User.hasMany(models.ReferalZestfindz, { foreignKey: 'user_id' });
 
+    // User.hasOne(models.Wallet, { as: 'wallet', foreignKey: 'user_id' });
+    // User.hasOne(models.Shop, { as: 'shop', foreignKey: 'user_id' });
+    // User.belongsToMany(models.Role, { through: 'user_roles', as: 'roles', foreignKey: 'user_id' });
+
+  };
 
   return User;
 };

@@ -35,7 +35,7 @@ Object.keys(db).forEach(modelName => {
     db[modelName].associate(db);
   }
 });
-console.log('Loaded models:', Object.keys(db));
+// console.log('Loaded models:', Object.keys(db));
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
