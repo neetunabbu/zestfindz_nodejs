@@ -1,4 +1,4 @@
-const { User, OtpsForUser } = require('../../../models');
+const { User, OtpsForUser } = require('../../../../../models');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 const dayjs = require('dayjs');

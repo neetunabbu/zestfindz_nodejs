@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const userLoginController = require('../../../controllers/userLoginController');
+const userLoginController = require('../../../controllers/Api/v1/dashboard/Auth/userLoginController');
 
 // Register new user phone (send OTP)
 router.post('/register-new-user-phone', userLoginController.registerPhoneOtp);

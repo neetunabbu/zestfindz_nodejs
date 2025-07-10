@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { sequelize,User, Role ,Shop, Wallet, ModelHasRole} = require('../models'); 
+const { sequelize,User, Role ,Shop, Wallet, ModelHasRole} = require('../../../../../models'); 
 const { v4: uuidv4 } = require('uuid');
 
 const jwt = require('jsonwebtoken');
