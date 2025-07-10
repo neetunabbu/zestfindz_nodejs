@@ -16,10 +16,10 @@ app.get('/', (req, res) => {
 // ✅ User Routes
 const adminUserRoutes = require('./src/routes/api/v1/Dashboard/admin/user.routes');
 const adminRoleRoutes = require('./src/routes/api/v1/Dashboard/admin/role.routes');
-const authRoutes = require("./src/routes/auth.js");
+const authRoutes = require("./src/routes/auth");
+
+// ✅ Mock Auth Middleware 
 const mockAuth = require('./src/middleware/mockAuth');
-// ✅ Mock Auth Middleware for Testing (apply only to admin routes)
-// const mockAuth = require('./src/middleware/mockAuth');
 app.use('/api/admin', (req, res, next) => {
     try {
         mockAuth(req, res, () => {
@@ -37,7 +37,6 @@ app.use('/api/admin', (req, res, next) => {
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin', adminRoleRoutes);
 
-// Auth routes (no mockAuth)
 app.use('/api/v1/auth', authRoutes);
 
 // User phone/OTP login routes
@@ -46,6 +45,9 @@ app.use('/api/v1/auth', userLoginRoutes);
 
 const restRoutes = require('./src/routes/api/v1/rest.routes');
 app.use('/api/v1/rest', restRoutes);
+
+const apiRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
+app.use('/api/v1/seller', apiRoutes);
 
 app.get('/test', (req, res) => {
     console.log("testing");

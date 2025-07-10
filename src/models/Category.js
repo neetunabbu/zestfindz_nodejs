@@ -1,10 +1,5 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db');
-
-class Category extends Model {}
-
-Category.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const Category = sequelize.define('Category', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -68,15 +63,21 @@ Category.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'Category',
+  }, {
     tableName: 'categories',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-  }
-);
+    underscored: true,      // Added for consistency with other models
+    freezeTableName: true,  // Added for consistency with other models
+  });
 
-module.exports = Category;
+  // Define associations here if any, similar to other models
+  // Category.associate = models => {
+  //   Category.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
+  //   Category.belongsTo(models.Category, { foreignKey: 'parent_id', as: 'parent' });
+  //   Category.hasMany(models.Category, { foreignKey: 'parent_id', as: 'children' });
+  // };
+
+  return Category;
+};

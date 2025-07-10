@@ -1,7 +1,7 @@
 // src/routes/api/v1/Dashboard/admin/user.routes.js
 const express = require('express');
 const router = express.Router();
-const userController = require('../../../../../controllers/dashboard/admin/user.controller.js');
+const userController = require('../../../../../controllers/Api/v1/dashboard/admin/user.controller.js');
 const authMiddleware = require('../../../../../middleware/authMiddleware');
 const roleMiddleware = require('../../../../../middleware/roleMiddleware');
 

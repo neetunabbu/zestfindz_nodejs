@@ -14,7 +14,7 @@ const logger = winston.createLogger({
 });
 
 // Mixin to provide error logging functionality
-const LoggableMixin = {
+const Loggable = {
   // Log error details
   error: (error) => {
     logger.error(error.message, {
@@ -27,4 +27,4 @@ const LoggableMixin = {
   }
 };
 
-module.exports = LoggableMixin;
+module.exports = Loggable;
