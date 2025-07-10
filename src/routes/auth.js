@@ -1,7 +1,7 @@
 // src\routes\auth.js
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/auth.js');
+const authController = require('../controllers/Api/v1/dashboard/Auth/auth');
 
 // Register
 router.post('/register', authController.ensureSession, authController.register);

@@ -1,7 +1,7 @@
 // src/routes/api/v1/rest.routes.js
 const express = require('express');
 const { Setting, Language, Currency } = require('../../../models');
-const settingController = require('../../../controllers/settingController');
+const settingController = require('../../../controllers/Api/v1/dashboard/user/settingController');
 
 const router = express.Router();
 
