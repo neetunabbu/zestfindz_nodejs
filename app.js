@@ -1,30 +1,27 @@
-// D:\zestfindz\app.js
 
 const express = require('express');
 const app = express();
 require('dotenv').config(); 
 const cors = require('cors');
-// ✅ Middleware
+
 app.use(express.json());
 app.use(cors());
 
-// ✅ Home Route
 app.get('/', (req, res) => {
     res.send('✅ Welcome to Zestfindz API');
 });
 
-// ✅ User Routes
 const adminUserRoutes = require('./src/routes/api/v1/Dashboard/admin/user.routes');
 const adminRoleRoutes = require('./src/routes/api/v1/Dashboard/admin/role.routes');
-const authRoutes = require("./src/routes/auth.js");
+const authRoutes = require("./src/routes/auth");
+
+// ✅ Mock Auth Middleware 
 const mockAuth = require('./src/middleware/mockAuth');
-// ✅ Mock Auth Middleware for Testing (apply only to admin routes)
-// const mockAuth = require('./src/middleware/mockAuth');
+
+
 app.use('/api/admin', (req, res, next) => {
     try {
         mockAuth(req, res, () => {
-            // Log to verify that user is attached by mockAuth
-            // console.log('✅ mockAuth ran — user:', req.user);
             next();
         });
     } catch (err) {
@@ -33,29 +30,31 @@ app.use('/api/admin', (req, res, next) => {
     }
 });
 
-// Mount admin routes after mockAuth
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin', adminRoleRoutes);
+app.use('/api/be-seller', adminRoleRoutes);
 
-// Auth routes (no mockAuth)
 app.use('/api/v1/auth', authRoutes);
 
-// User phone/OTP login routes
+
+
 const userLoginRoutes = require('./src/routes/api/v1/userLogin.routes');
 app.use('/api/v1/auth', userLoginRoutes);
 
 const restRoutes = require('./src/routes/api/v1/rest.routes');
 app.use('/api/v1/rest', restRoutes);
 
+const apiRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
+app.use('/api/v1/seller', apiRoutes);
+
 app.get('/test', (req, res) => {
     console.log("testing");
     res.json({ message: '✅ Test route is working!' });
 });
 
-// 404 handler
 app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
 
-// ✅ Export the app
 module.exports = app;
+

@@ -1,3 +1,63 @@
+
+const userService = require('../../../../../services/user.service'); // Adjust the path as necessary
+const { User } = require('../../../../../models'); // Adjust the path as necessary
+
+module.exports = {
+  getUsers: async (req, res) => {
+    try {
+      // const users = await User.findAll({ include: ['roles'] });
+      const users = await User.findAll();
+      res.json(users);
+    } catch (error) {
+      console.error('getUsers error:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
+
+  createUser: async (req, res) => {
+    try {
+      const result = await userService.createUser(req.body);
+      if (!result.success) {
+        return res.status(400).json(result);
+      }
+      res.status(201).json(result);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  },
+
+  getUserByUUID: async (req, res) => {
+    try {
+      const user = await userService.findUserByUUID(req.params.uuid);
+      // if (!user) return res.status(404).json({ message: 'User not found' });
+      res.json(user);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  },
+
+  updateUser: async (req, res) => {
+    try {
+      const user = await userService.updateUser(req.params.uuid, req.body);
+      // if (!user) return res.status(404).json({ message: 'User not found' });
+      res.json(user);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  },
+
+  deleteUsers: async (req, res) => {
+    try {
+      const result = await userService.deleteUsers(req.body.uuids);
+      res.json({ deleted: result });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+};
+
+
+
 // const { Op } = require('sequelize');
 // const User = require('../../../models/User');
 // const userService = require('../../../services/user.service');
@@ -208,62 +268,5 @@
 //     }
 // };
 
-
-const userService = require('../../../services/user.service');
-const { User } = require('../../../models');
-
-module.exports = {
-  getUsers: async (req, res) => {
-    try {
-      // const users = await User.findAll({ include: ['roles'] });
-      const users = await User.findAll();
-      res.json(users);
-    } catch (error) {
-      console.error('getUsers error:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  },
-
-  createUser: async (req, res) => {
-    try {
-      const result = await userService.createUser(req.body);
-      if (!result.success) {
-        return res.status(400).json(result);
-      }
-      res.status(201).json(result);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  },
-
-  getUserByUUID: async (req, res) => {
-    try {
-      const user = await userService.findUserByUUID(req.params.uuid);
-      // if (!user) return res.status(404).json({ message: 'User not found' });
-      res.json(user);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  },
-
-  updateUser: async (req, res) => {
-    try {
-      const user = await userService.updateUser(req.params.uuid, req.body);
-      // if (!user) return res.status(404).json({ message: 'User not found' });
-      res.json(user);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  },
-
-  deleteUsers: async (req, res) => {
-    try {
-      const result = await userService.deleteUsers(req.body.uuids);
-      res.json({ deleted: result });
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  }
-};
 
 // app.use('/api/admin/users', adminUserRoutes);

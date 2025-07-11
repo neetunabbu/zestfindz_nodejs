@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
-const { User, CustomerVerify  } = require('../models');
+const { User, CustomerVerify  } = require('../../../../../models');
 const { Op } = require('sequelize');
 
 // Helper to send SMS (mocked for demo)

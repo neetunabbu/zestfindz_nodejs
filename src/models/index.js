@@ -21,7 +21,7 @@ fs.readdirSync(__dirname)
         const model = modelFile(sequelize, Sequelize.DataTypes);
         db[model.name] = model;
       } else {
-        console.warn(`⚠️  Skipped loading model "${file}" - not a function`);
+        // console.warn(`⚠️  Skipped loading model "${file}" - not a function`);
       }
     } catch (err) {
       // console.error(`❌ Failed to load model "${file}":`, err.message);
@@ -35,7 +35,7 @@ Object.keys(db).forEach(modelName => {
     db[modelName].associate(db);
   }
 });
-console.log('Loaded models:', Object.keys(db));
+// console.log('Loaded models:', Object.keys(db));
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

@@ -1,9 +1,9 @@
 // src/controllers/settingController.js
 
-const { Settings, Language } = require('../models');
-const { successResponse, errorResponse } = require('../helpers/ApiResponse');
-const cache = require('../utils/cache'); // ✅ corrected path
-const { Translation } = require('../models');
+const { Settings, Language } = require('../../../../../models');
+const { successResponse, errorResponse } = require('../../../../../helpers/ApiResponse');
+const cache = require('../../../../../utils/cache'); // ✅ corrected path
+const { Translation } = require('../../../../../models');
 
 const SettingController = {
   async settingsInfo(req, res) {

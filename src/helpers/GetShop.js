@@ -1,25 +1,21 @@
-// D:\zestfindz_nodejs\src\helpers\GetShop.js
+// src\helpers\GetShop.js
+// const ApiResponse = require('../utils/apiResponse');
+const GetShop = (sequelize) => {
+  const Shop = sequelize.models.Shop;
 
-const GetShop = {
-  /**
-   * @returns {Object|null} shop
-   */
-  shop: async (req) => {
-    let shop = null;
-
-    const user = req.user; // Assume user is attached to request after JWT auth middleware
-
-    if (user?.shop) {
-      shop = user.shop;
-    } else if (
-      user?.moderatorShop &&
-      (user.role === 'moderator' || user.role === 'deliveryman')
-    ) {
-      shop = user.moderatorShop;
+  return {
+    async shop(req) {
+      try {
+        const shop = await Shop.findOne({ where: { user_id: req.userId } });
+        if (!shop) {
+          throw new Error('Shop not found for user');
+        }
+        return shop;
+      } catch (error) {
+        throw new Error(`GetShop failed: ${error.message}`);
+      }
     }
-
-    return shop;
-  },
+  };
 };
 
 module.exports = GetShop;

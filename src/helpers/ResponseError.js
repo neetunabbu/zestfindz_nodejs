@@ -1,50 +1,48 @@
-// src/helpers/ResponseError.js
+// src/helpers/responseError.js
 
 const ResponseError = {
   NO_ERROR: 'NO_ERROR',
+  ERROR_100: 'ERROR_100', // 'User is not logged in.'
+  ERROR_101: 'ERROR_101', // 'User does not have the right roles.'
+  ERROR_102: 'ERROR_102', // 'Login or password is incorrect.'
+  ERROR_103: 'ERROR_103', // 'User email address is not verified'
+  ERROR_104: 'ERROR_104', // 'User phone number is not verified'
+  ERROR_105: 'ERROR_105', // 'User account is not verified'
+  ERROR_106: 'ERROR_106', // 'User already exists'
+  ERROR_107: 'ERROR_107', // 'Please log in using socials'
+  ERROR_108: 'ERROR_108', // 'User doesn\'t have Wallet'
+  ERROR_109: 'ERROR_109', // 'Insufficient wallet balance'
+  ERROR_110: 'ERROR_110', // 'Can\'t update this user role'
+  ERROR_111: 'ERROR_111', // 'You can buy only :quantity products'
+  ERROR_112: 'ERROR_112', // 'You can buy only :quantity products'
+  ERROR_113: 'ERROR_113', // 'Deliveryman doesn\'t have Wallet'
+  ERROR_114: 'ERROR_114', // 'Seller doesn\'t have Wallet'
+  ERROR_115: 'ERROR_115', // 'Phone not found'
+  ERROR_116: 'ERROR_116', // 'Ads already activated'
+  ERROR_117: 'ERROR_117', // 'Phone is required'
+  ERROR_118: 'ERROR_118', // 'Shop is closed'
+  ERROR_119: 'ERROR_119', // 'Duplicate stock'
 
-  ERROR_100: 'ERROR_100',
-  ERROR_101: 'ERROR_101',
-  ERROR_102: 'ERROR_102',
-  ERROR_103: 'ERROR_103',
-  ERROR_104: 'ERROR_104',
-  ERROR_105: 'ERROR_105',
-  ERROR_106: 'ERROR_106',
-  ERROR_107: 'ERROR_107',
-  ERROR_108: 'ERROR_108',
-  ERROR_109: 'ERROR_109',
-  ERROR_110: 'ERROR_110',
-  ERROR_111: 'ERROR_111',
-  ERROR_112: 'ERROR_112',
-  ERROR_113: 'ERROR_113',
-  ERROR_114: 'ERROR_114',
-  ERROR_115: 'ERROR_115',
-  ERROR_116: 'ERROR_116',
-  ERROR_117: 'ERROR_117',
-  ERROR_118: 'ERROR_118',
-  ERROR_119: 'ERROR_119',
-
-  ERROR_201: 'ERROR_201',
-  ERROR_202: 'ERROR_202',
-  ERROR_203: 'ERROR_203',
-
-  ERROR_204: 'ERROR_204',
-  ERROR_205: 'ERROR_205',
-  ERROR_206: 'ERROR_206',
-  ERROR_207: 'ERROR_207',
-  ERROR_208: 'ERROR_208',
-  ERROR_209: 'ERROR_209',
-  ERROR_210: 'ERROR_210',
-  ERROR_211: 'ERROR_211',
-  ERROR_212: 'ERROR_212',
-  ERROR_213: 'ERROR_213',
-  ERROR_214: 'ERROR_214',
-  ERROR_215: 'ERROR_215',
-  ERROR_216: 'ERROR_216',
-  ERROR_217: 'ERROR_217',
-  ERROR_218: 'ERROR_218',
-  ERROR_219: 'ERROR_219',
-  ERROR_220: 'ERROR_220',
+  ERROR_201: 'ERROR_201', // 'Wrong OTP Code'
+  ERROR_202: 'ERROR_202', // 'Too many request, try later'
+  ERROR_203: 'ERROR_203', // 'OTP code is expired'
+  ERROR_204: 'ERROR_204', // 'You are not seller yet or your shop is not approved'
+  ERROR_205: 'ERROR_205', // 'Shop already created'
+  ERROR_206: 'ERROR_206', // 'User already has Shop'
+  ERROR_207: 'ERROR_207', // 'Can\'t update Shop Seller'
+  ERROR_208: 'ERROR_208', // 'Subscription already active'
+  ERROR_209: 'ERROR_209', // 'Shop delivery zone already created'
+  ERROR_210: 'ERROR_210', // 'Delivery already attached'
+  ERROR_211: 'ERROR_211', // 'invalid deliveryman or token not found'
+  ERROR_212: 'ERROR_212', // 'Not your shop. Check your other account'
+  ERROR_213: 'ERROR_213', // 'Shop is parent'
+  ERROR_214: 'ERROR_214', // 'Your subscription product limit has expired'
+  ERROR_215: 'ERROR_215', // 'Incorrect code or token expired'
+  ERROR_216: 'ERROR_216', // 'Verify code sent'
+  ERROR_217: 'ERROR_217', // 'email code sent'
+  ERROR_218: 'ERROR_218', // 'not activated'
+  ERROR_219: 'ERROR_219', // 'Your subscription is expired at'
+  ERROR_220: 'ERROR_220', // 'Your subscription product limit has expired'
 
   ERROR_249: 'ERROR_249',
   ERROR_250: 'ERROR_250',
@@ -80,6 +78,7 @@ const ResponseError = {
   ERROR_509: 'ERROR_509',
   ERROR_510: 'ERROR_510',
 
+  // Custom messages
   NEW_ORDER: 'NEW_ORDER',
   NEW_PARCEL_ORDER: 'NEW_PARCEL_ORDER',
   CONFIRMATION_CODE: 'CONFIRMATION_CODE',
@@ -126,6 +125,7 @@ const ResponseError = {
   CANT_UPDATE_EMPTY_ORDER: 'CANT_CREATE_OR_UPDATE_EMPTY_ORDER',
   REPLACE_PRODUCT: 'REPLACE_PRODUCT',
 
+  // Labels
   TAX: 'TAX',
   DATE: 'DATE',
   FROM: 'FROM',

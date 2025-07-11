@@ -1,5 +1,5 @@
-// src/controllers/dashboard/admin/role.controller.js
-const Role = require('../../../models/Role');
+// src/controllers/api/v1/dashboard/admin/role.controller.js
+const Role = require('../../../../../models/Role'); // Ensure correct path to Role model
 
 module.exports = {
     // GET /api/v1/dashboard/admin/roles
