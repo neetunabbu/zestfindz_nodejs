@@ -1,3 +1,4 @@
+// src/models/Category.js
 module.exports = (sequelize, DataTypes) => {
   const Category = sequelize.define('Category', {
     id: {
@@ -20,9 +21,9 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0,
     },
     type: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.ENUM('main', 'sub_main', 'child', 'receipt'), 
       allowNull: false,
-      defaultValue: 1,
+      defaultValue: 'main',
     },
     input: {
       type: DataTypes.INTEGER,
@@ -48,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'pending',
     },
     shop_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER, // Assuming INTEGER for shop_id
       allowNull: true,
     },
     created_at: {
@@ -62,6 +63,15 @@ module.exports = (sequelize, DataTypes) => {
     slug: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    return_window_time: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    gst: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      defaultValue: 0.00,
     },
   }, {
     tableName: 'categories',
