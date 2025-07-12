@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     user_id: {
       type: DataTypes.BIGINT,
       allowNull: false,
+      unique: true
     },
     tax: {
       type: DataTypes.DOUBLE,
