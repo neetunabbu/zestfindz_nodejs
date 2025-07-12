@@ -72,12 +72,11 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,  // Added for consistency with other models
   });
 
-  // Define associations here if any, similar to other models
-  // Category.associate = models => {
-  //   Category.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
-  //   Category.belongsTo(models.Category, { foreignKey: 'parent_id', as: 'parent' });
-  //   Category.hasMany(models.Category, { foreignKey: 'parent_id', as: 'children' });
-  // };
+  Category.associate = models => {
+    Category.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
+    Category.belongsTo(models.Category, { foreignKey: 'parent_id', as: 'parent' });
+    Category.hasMany(models.Category, { foreignKey: 'parent_id', as: 'children' });
+  };
 
   return Category;
 };

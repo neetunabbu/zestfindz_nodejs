@@ -21,3 +21,5 @@ yarn-error.log
 .github/workflows/main.yml
 rr
 .rr.yaml
+/uploads/*
+!/uploads/.gitkeep

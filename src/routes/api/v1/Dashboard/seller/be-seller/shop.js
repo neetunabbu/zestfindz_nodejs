@@ -11,15 +11,15 @@ const verifyToken = require('../../../../../../middleware/verifyToken');
 const { randomBytes } = require('crypto');
 const moment = require('moment-timezone');
 const { getGeocodedLocation } = require('../../../../../../services/googleService');
+const { syncDelhiveryWarehouse } = require('../../../../../../helpers/delhiveryHelper');
 
 const uploadToS3 = async (file, folder = '') => {
-  const fileStream = fs.createReadStream(file.path);
   const fileKey = `${folder}${Date.now()}-${file.originalname}`;
 
   const uploadParams = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: fileKey,
-    Body: fileStream,
+    Body: file.buffer,
     ContentType: file.mimetype,
   };
 
@@ -29,7 +29,7 @@ const uploadToS3 = async (file, folder = '') => {
 };
 
 
-router.post(
+router.put(
   '/create-shop-seller',
   verifyToken,
   upload.fields([
@@ -138,6 +138,17 @@ router.post(
         }
       );
 
+      const syncResponse = await syncDelhiveryWarehouse(shopLocation.id, newShop.id);
+
+      if (!syncResponse.success) {
+        console.error('Delhivery sync failed:', syncResponse);
+        
+        res.status(400).json({
+          success: false,
+          message: "Address is Not Accurate Use Nearby Famous Place",
+        });
+
+      }
 
       res.status(201).json({
         success: true,
@@ -146,6 +157,7 @@ router.post(
           shop: newShop,
         },
       });
+
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, message: 'Server error' });

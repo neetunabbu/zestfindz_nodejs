@@ -6,24 +6,24 @@ const s3 = require('../../../../../../config/s3');
 const express = require('express');
 const router = express.Router();
 const upload = require('../../../../../../middleware/upload');
-const db = require('../../../../../../models'); // Import the initialized models
+const db = require('../../../../../../models');
 const verifyToken = require('../../../../../../middleware/verifyToken');
 
-const uploadToS3 = async (file, folder = '') => {
-  const fileStream = fs.createReadStream(file.path);
-  const fileKey = `${folder}${Date.now()}-${file.originalname}`;
+const uploadToS3 = async (fileBuffer, fileName, mimetype, folder = '') => {
+  const fileKey = `${folder}${Date.now()}-${fileName}`;
 
   const uploadParams = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: fileKey,
-    Body: fileStream,
-    ContentType: file.mimetype,
+    Body: fileBuffer,
+    ContentType: mimetype,
   };
 
   await s3.send(new PutObjectCommand(uploadParams));
 
   return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
 };
+
 
 router.post(
   '/upload-bank-doc',
@@ -46,13 +46,19 @@ router.post(
 
       const user_id = req.user?.user_id;
 
-      console.log("................",user_id);
-      
-      
+      const cancelChequeUrl = await uploadToS3(
+        cancelCheque.buffer,
+        cancelCheque.originalname,
+        cancelCheque.mimetype,
+        'bank_docs/'
+      );
 
-      const cancelChequeUrl = await uploadToS3(cancelCheque, 'bank_docs/');
-      const signatureUrl = await uploadToS3(signature, 'bank_docs/');
-
+      const signatureUrl = await uploadToS3(
+        signature.buffer,
+        signature.originalname,
+        signature.mimetype,
+        'bank_docs/'
+      );
 
       const [bankDoc, created] = await db.BankDoc.upsert({
         account_number,
@@ -79,6 +85,7 @@ router.post(
     }
   }
 );
+
 
 
 // routes/bankDoc.js
