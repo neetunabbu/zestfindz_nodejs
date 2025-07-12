@@ -1,11 +1,5 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
-
-class CategoryTranslation extends Model {}
-
-// Define model fields
-CategoryTranslation.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const CategoryTranslation = sequelize.define('CategoryTranslation', {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -25,16 +19,22 @@ CategoryTranslation.init(
       allowNull: false,
     },
     description: {
-      type: DataTypes.TEXT,   // ✅ Corrected type from STRING to TEXT
+      type: DataTypes.TEXT,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'CategoryTranslation',
+  }, {
     tableName: 'category_translations',
     timestamps: false,
-  }
-);
+    underscored: true,
+    freezeTableName: true,
+  });
 
-module.exports = CategoryTranslation;
+  CategoryTranslation.associate = (models) => {
+    CategoryTranslation.belongsTo(models.Category, {
+      foreignKey: 'category_id',
+      as: 'category',
+    });
+  };
+
+  return CategoryTranslation;
+};

@@ -1,21 +1,12 @@
-// src\helpers\GetShop.js
-// const ApiResponse = require('../utils/apiResponse');
-const GetShop = (sequelize) => {
-  const Shop = sequelize.models.Shop;
+// src/helpers/GetShop.js
+const { Shop } = require('../models');
 
-  return {
-    async shop(req) {
-      try {
-        const shop = await Shop.findOne({ where: { user_id: req.userId } });
-        if (!shop) {
-          throw new Error('Shop not found for user');
-        }
-        return shop;
-      } catch (error) {
-        throw new Error(`GetShop failed: ${error.message}`);
-      }
-    }
-  };
+const getShop = {
+  async shop(req) {
+    const shop = await Shop.findOne({ where: { user_id: req.userId } });
+    if (!shop) throw new Error('Shop not found for user');
+    return shop;
+  }
 };
 
-module.exports = GetShop;
+module.exports = getShop;

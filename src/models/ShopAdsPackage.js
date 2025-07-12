@@ -3,7 +3,7 @@ const sequelize = require('../config/db'); // PostgreSQL connection
 
 const ShopAdsPackage = sequelize.define('ShopAdsPackage', {
   id: {
-    type: DataTypes.BIGINT, // matches BIGSERIAL
+    type: DataTypes.BIGINT,
     primaryKey: true,
     autoIncrement: true,
   },
@@ -23,7 +23,7 @@ const ShopAdsPackage = sequelize.define('ShopAdsPackage', {
   status: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 'new',  // <-- Added missing default
+    defaultValue: 'new', 
   },
   expired_at: {
     type: DataTypes.DATE,
@@ -32,7 +32,7 @@ const ShopAdsPackage = sequelize.define('ShopAdsPackage', {
   position_page: {
     type: DataTypes.SMALLINT,
     allowNull: false,
-    defaultValue: 1,  // <-- Added missing field
+    defaultValue: 1, 
   },
 }, {
   tableName: 'shop_ads_packages',

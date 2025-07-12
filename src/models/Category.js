@@ -1,3 +1,4 @@
+// src/models/Category.js
 module.exports = (sequelize, DataTypes) => {
   const Category = sequelize.define('Category', {
     id: {
@@ -20,9 +21,9 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0,
     },
     type: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.ENUM('main', 'sub_main', 'child', 'receipt'), 
       allowNull: false,
-      defaultValue: 1,
+      defaultValue: 'main',
     },
     input: {
       type: DataTypes.INTEGER,
@@ -48,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'pending',
     },
     shop_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER, // Assuming INTEGER for shop_id
       allowNull: true,
     },
     created_at: {
@@ -63,21 +64,66 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    return_window_time: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    gst: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      defaultValue: 0.00,
+    },
   }, {
     tableName: 'categories',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    underscored: true,      // Added for consistency with other models
-    freezeTableName: true,  // Added for consistency with other models
+    underscored: true,
+    freezeTableName: true,
   });
 
-  // Define associations here if any, similar to other models
-  // Category.associate = models => {
-  //   Category.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
-  //   Category.belongsTo(models.Category, { foreignKey: 'parent_id', as: 'parent' });
-  //   Category.hasMany(models.Category, { foreignKey: 'parent_id', as: 'children' });
-  // };
+  // Define associations for Category
+  Category.associate = (models) => {
+    // Category has many translations
+    Category.hasMany(models.CategoryTranslation, {
+      foreignKey: 'category_id',
+      as: 'translations',
+    });
+
+    // Category has many meta tags (polymorphic association)
+    Category.hasMany(models.CategoryMetaTag, {
+      foreignKey: 'translatable_id',
+      constraints: false, // Important for polymorphic associations
+      scope: {
+        translatable_type: 'Category',
+      },
+      as: 'metaTags',
+    });
+
+    // Category can belong to a Shop
+    Category.belongsTo(models.Shop, {
+      foreignKey: 'shop_id',
+      as: 'shop',
+    });
+
+    // Self-referencing association for parent/child categories
+    Category.belongsTo(models.Category, {
+      foreignKey: 'parent_id',
+      as: 'parent',
+      // Optional: Add onDelete/onUpdate if you want cascading behavior
+      // onDelete: 'CASCADE',
+    });
+    Category.hasMany(models.Category, {
+      foreignKey: 'parent_id',
+      as: 'children',
+    });
+
+    // If products belong to categories:
+    // Category.hasMany(models.Product, {
+    //   foreignKey: 'category_id',
+    //   as: 'products',
+    // });
+  };
 
   return Category;
 };

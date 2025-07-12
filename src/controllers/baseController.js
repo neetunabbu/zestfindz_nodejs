@@ -1,6 +1,6 @@
 const ApiResponse = require('../../Traits/apiResponse');
-const LoggableMixin = require('../../Traits/loggableMixin');
-const GetShop = require('../../Traits/getShop');
+const Loggable = require('../../Traits/loggable');
+const GetShop = require('../../helpers/GetShop');
 const OrderHelper = require('../../Traits/orderHelper');
 const Notification = require('../../Traits/notification');
 const OrderReportHelper = require('../../Traits/orderReportHelper');
@@ -18,13 +18,13 @@ class BaseController {
 
   // Send success response
   successResponse(res, message, data = null) {
-    LoggableMixin.error(new Error(`[BaseController] Success response: message=${message}`));
+    Loggable.error(new Error(`[BaseController] Success response: message=${message}`));
     return ApiResponse.successResponse(res, message, data);
   }
 
   // Send error response
   errorResponse(res, errorCode, message, statusCode = 500) {
-    LoggableMixin.error(new Error(`[BaseController] Error response: code=${errorCode}, message=${message}, status=${statusCode}`));
+    Loggable.error(new Error(`[BaseController] Error response: code=${errorCode}, message=${message}, status=${statusCode}`));
     return ApiResponse.errorResponse(res, errorCode, message, statusCode);
   }
 
@@ -43,7 +43,7 @@ class BaseController {
 
       return user;
     } catch (error) {
-      LoggableMixin.error(new Error(`[BaseController] Error in getAuthUser: ${error.message}`));
+      Loggable.error(new Error(`[BaseController] Error in getAuthUser: ${error.message}`));
       throw error;
     }
   }
@@ -63,7 +63,7 @@ class BaseController {
         throw new Error(`Validation failed: ${errors.join(', ')}`);
       }
     } catch (error) {
-      LoggableMixin.error(new Error(`[BaseController] Error in validateRequest: ${error.message}`));
+      Loggable.error(new Error(`[BaseController] Error in validateRequest: ${error.message}`));
       throw error;
     }
   }

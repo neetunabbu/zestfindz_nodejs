@@ -1,3 +1,4 @@
+// src\Traits\ApiResponse.js
 const { StatusCodes } = require('http-status-codes');
 
 // Utility functions for standardized API responses
