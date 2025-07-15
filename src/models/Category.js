@@ -1,3 +1,4 @@
+// src/models/Category.js
 module.exports = (sequelize, DataTypes) => {
   const Category = sequelize.define('Category', {
     id: {
@@ -20,9 +21,9 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0,
     },
     type: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.ENUM('main', 'sub_main', 'child', 'receipt'), 
       allowNull: false,
-      defaultValue: 1,
+      defaultValue: 'main',
     },
     input: {
       type: DataTypes.INTEGER,
@@ -48,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'pending',
     },
     shop_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER, // Assuming INTEGER for shop_id
       allowNull: true,
     },
     created_at: {
@@ -63,6 +64,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    return_window_time: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    gst: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      defaultValue: 0.00,
+    },
   }, {
     tableName: 'categories',
     timestamps: true,
@@ -72,12 +82,11 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,  // Added for consistency with other models
   });
 
-  // Define associations here if any, similar to other models
-  // Category.associate = models => {
-  //   Category.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
-  //   Category.belongsTo(models.Category, { foreignKey: 'parent_id', as: 'parent' });
-  //   Category.hasMany(models.Category, { foreignKey: 'parent_id', as: 'children' });
-  // };
+  Category.associate = models => {
+    Category.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
+    Category.belongsTo(models.Category, { foreignKey: 'parent_id', as: 'parent' });
+    Category.hasMany(models.Category, { foreignKey: 'parent_id', as: 'children' });
+  };
 
   return Category;
 };

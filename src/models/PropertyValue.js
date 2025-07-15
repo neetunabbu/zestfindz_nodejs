@@ -1,51 +1,49 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
-const PropertyGroup = require('./PropertyGroup');
-const Product = require('./Product');
-
-class PropertyValue extends Model {}
-
-PropertyValue.init(
-  {
+// models/PropertyValue.js
+module.exports = (sequelize, DataTypes) => {
+  const PropertyValue = sequelize.define('PropertyValue', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
     },
     property_group_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     img: {
       type: DataTypes.STRING,
-      allowNull: true, // ✅ corrected
+      allowNull: true,
     },
     value: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(191),
       allowNull: false,
     },
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true, // ✅ corrected
+      defaultValue: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'PropertyValue',
+  }, {
+    tableName: 'property_values',
     timestamps: false,
-    freezeTableName: true, // prevent Sequelize from pluralizing table name
-  }
-);
+    underscored: true,
+  });
 
-// Relationships
-PropertyValue.belongsTo(PropertyGroup, { as: 'group', foreignKey: 'property_group_id' });
-PropertyValue.belongsToMany(Product, { 
-  as: 'products', 
-  through: 'product_properties',  // ✅ table names should match DB (case-sensitive in PostgreSQL)
-  foreignKey: 'property_value_id',
-  otherKey: 'product_id'
-});
+  PropertyValue.associate = (models) => {
+    // belongsTo PropertyGroup
+    PropertyValue.belongsTo(models.PropertyGroup, {
+      foreignKey: 'property_group_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
 
-module.exports = PropertyValue;
+    // hasMany ProductProperty
+    PropertyValue.hasMany(models.ProductProperty, {
+      foreignKey: 'property_value_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return PropertyValue;
+};

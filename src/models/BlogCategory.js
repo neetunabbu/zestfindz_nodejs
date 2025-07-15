@@ -1,36 +1,22 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+// models/blogCategory.model.js
 
-class BlogCategory extends Model {}
-
-BlogCategory.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const BlogCategory = sequelize.define('BlogCategory', {
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
       primaryKey: true,
-      allowNull: false,
+      autoIncrement: true,
+      allowNull: false
     },
     name: {
       type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'BlogCategory',
+      allowNull: false
+    }
+  }, {
     tableName: 'blog_categories',
-    timestamps: false,  // disable timestamps to match your current table
-  }
-);
-
-// ✅ Associations
-BlogCategory.associate = (models) => {
-  BlogCategory.hasMany(models.Blog, {
-    foreignKey: 'category_id',
-    sourceKey: 'id',
-    as: 'blogs',
+    timestamps: false, // Set to true if you plan to use createdAt/updatedAt columns
+    underscored: true
   });
-};
 
-module.exports = BlogCategory;
+  return BlogCategory;
+};

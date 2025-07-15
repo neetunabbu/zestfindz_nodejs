@@ -1,45 +1,40 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
-
-class Product extends Model {}
-
-Product.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const Product = sequelize.define('Product', {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
+      autoIncrement: true,
     },
     uuid: {
       type: DataTypes.UUID,
       allowNull: false,
     },
     shop_id: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
     },
     category_id: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: true,
     },
     brand_id: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: true,
     },
     unit_id: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: true,
     },
     keywords: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(191),
       allowNull: true,
     },
     img: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     qr_code: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     tax: {
@@ -48,46 +43,38 @@ Product.init(
     },
     active: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
       defaultValue: false,
     },
     status: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.ENUM('published', 'pending', 'unpublished'),
       defaultValue: 'pending',
     },
     min_qty: {
       type: DataTypes.INTEGER,
-      allowNull: false,
       defaultValue: 1,
     },
     max_qty: {
       type: DataTypes.INTEGER,
-      allowNull: false,
       defaultValue: 2147483647,
     },
     digital: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
       defaultValue: false,
     },
     age_limit: {
       type: DataTypes.SMALLINT,
-      allowNull: false,
       defaultValue: 0,
     },
     visibility: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
       defaultValue: true,
     },
     interval: {
       type: DataTypes.DOUBLE,
-      allowNull: false,
       defaultValue: 1,
     },
     status_note: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     r_count: {
@@ -131,19 +118,19 @@ Product.init(
       allowNull: true,
     },
     currency_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     country_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     city_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     region_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     slug: {
@@ -154,13 +141,52 @@ Product.init(
       type: DataTypes.STRING,
       defaultValue: 'N/A',
     },
-  },
-  {
-    sequelize,
-    modelName: 'Product',
+    seo_tags: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    }
+  }, {
     tableName: 'products',
-    timestamps: false, // Because you’re manually setting created_at/updated_at
-  }
-);
+    timestamps: false,
+    underscored: true,
+    paranoid: true,
+    deletedAt: 'deleted_at',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  });
 
-module.exports = Product;
+  /**
+   * Associations
+   */
+  Product.associate = function(models) {
+    Product.belongsTo(models.Shop, {
+      foreignKey: 'shop_id',
+      as: 'shop',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    Product.belongsTo(models.Category, {
+      foreignKey: 'category_id',
+      as: 'category',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    Product.belongsTo(models.Brand, {
+      foreignKey: 'brand_id',
+      as: 'brand',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    Product.belongsTo(models.Unit, {
+      foreignKey: 'unit_id',
+      as: 'unit',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return Product;
+};

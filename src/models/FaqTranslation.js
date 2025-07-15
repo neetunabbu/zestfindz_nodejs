@@ -1,38 +1,50 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+// models/faq_translation.js
 
-class FaqTranslation extends Model {}
-
-FaqTranslation.init({
+module.exports = (sequelize, DataTypes) => {
+  const FaqTranslation = sequelize.define('FaqTranslation', {
     id: {
-        type: DataTypes.BIGINT, // Match BIGSERIAL from SQL
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false
+      type: DataTypes.BIGINT.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true,
     },
     faq_id: {
-        type: DataTypes.BIGINT, // match BIGINT
-        allowNull: false
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
     },
     locale: {
-        type: DataTypes.STRING(255),
-        allowNull: false
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
     question: {
-        type: DataTypes.TEXT,  // corrected from STRING to TEXT
-        allowNull: false
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     answer: {
-        type: DataTypes.TEXT,  // corrected from STRING to TEXT
-        allowNull: true
+      type: DataTypes.TEXT,
+      allowNull: true,
     }
-}, {
-    sequelize,
-    modelName: 'FaqTranslation',
+  }, {
     tableName: 'faq_translations',
     timestamps: false,
-    underscored: true,
-    freezeTableName: true
-});
+    indexes: [
+      {
+        unique: true,
+        fields: ['faq_id', 'locale']
+      },
+      {
+        fields: ['locale']
+      }
+    ]
+  });
 
-module.exports = FaqTranslation;
+  FaqTranslation.associate = (models) => {
+    FaqTranslation.belongsTo(models.Faq, {
+      foreignKey: 'faq_id',
+      as: 'faq',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return FaqTranslation;
+};

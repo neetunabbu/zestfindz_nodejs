@@ -1,54 +1,68 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+// models/faq.js
 
-class Faq extends Model {
-    static associate(models) {
-        // Relationships
-        this.hasMany(models.FaqTranslation, { foreignKey: 'faq_id', as: 'translations' });
-        this.hasOne(models.FaqTranslation, { foreignKey: 'faq_id', as: 'translation' });
-        this.belongsTo(models.FaqCategory, { foreignKey: 'category_id', as: 'category' }); // ✅ for category_id
-    }
-}
-
-Faq.init({
+module.exports = (sequelize, DataTypes) => {
+  const Faq = sequelize.define('Faq', {
     id: {
-        type: DataTypes.BIGINT,          // BIGSERIAL → BIGINT
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false
+      type: DataTypes.BIGINT.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true,
     },
     uuid: {
-        type: DataTypes.UUID,            // Use native UUID
-        allowNull: false
+      type: DataTypes.UUID,
+      allowNull: false,
     },
     type: {
-        type: DataTypes.STRING(255),
-        allowNull: true
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
     active: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: true               // Default is TRUE as per SQL
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
     created_at: {
-        type: DataTypes.DATE,
-        allowNull: true
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     updated_at: {
-        type: DataTypes.DATE,
-        allowNull: true
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     category_id: {
-        type: DataTypes.INTEGER,
-        allowNull: true
+      type: DataTypes.INTEGER,
+      allowNull: true,
     }
-}, {
-    sequelize,
-    modelName: 'Faq',
+  }, {
     tableName: 'faqs',
     timestamps: false,
     underscored: true,
-    freezeTableName: true
-});
+    indexes: [
+      {
+        fields: ['uuid']
+      },
+      {
+        fields: ['category_id']
+      }
+    ]
+  });
 
-module.exports = Faq;
+  Faq.associate = (models) => {
+    // Association with faq_translations
+    Faq.hasMany(models.FaqTranslation, {
+      foreignKey: 'faq_id',
+      as: 'translations',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
+    });
+
+    // Association with faq_categories
+    Faq.belongsTo(models.FaqCategory, {
+      foreignKey: 'category_id',
+      as: 'category',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE'
+    });
+  };
+
+  return Faq;
+};

@@ -1,89 +1,74 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+// models/Area.js
 
-const Area = sequelize.define('Area', {
-  id: {
-    type: DataTypes.BIGINT,      // ✅ BIGINT for PostgreSQL BIGSERIAL
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  active: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  },
-  region_id: {
-    type: DataTypes.BIGINT,      // ✅ BIGINT for PostgreSQL
-    allowNull: true,
-  },
-  country_id: {
-    type: DataTypes.BIGINT,      // ✅ BIGINT for PostgreSQL
-    allowNull: true,
-  },
-  city_id: {
-    type: DataTypes.BIGINT,      // ✅ BIGINT for PostgreSQL
-    allowNull: true,
-  },
-}, {
-  tableName: 'areas',
-  timestamps: false,
-});
+const { DataTypes } = require('sequelize');
 
-// Define model relationships via associate function
-Area.associate = (models) => {
-  Area.hasMany(models.AreaTranslation, { as: 'translations', foreignKey: 'area_id' });
-  Area.hasOne(models.AreaTranslation, { as: 'translation', foreignKey: 'area_id' });
-
-  Area.hasOne(models.DeliveryPrice, { as: 'deliveryPrice', foreignKey: 'area_id' });
-  Area.hasMany(models.DeliveryPrice, { as: 'deliveryPrices', foreignKey: 'area_id' });
-};
-
-// Scopes
-Area.addScope('active', {
-  where: {
-    active: true,
-  },
-});
-
-Area.addScope('filter', (filter, lang, defaultLocale) => {
-  return {
-    include: [
-      {
-        model: sequelize.models.AreaTranslation,
-        as: 'translation',
-        required: false,
-        where: lang ? {
-          [Sequelize.Op.or]: [
-            { locale: lang },
-            { locale: defaultLocale },
-          ],
-        } : {},
-      },
-      {
-        model: sequelize.models.AreaTranslation,
-        as: 'translations',
-        required: false,
-        where: filter.search ? {
-          [Sequelize.Op.or]: [
-            { title: { [Sequelize.Op.iLike]: `%${filter.search}%` } },
-            { id: filter.search },
-          ],
-        } : {},
-        attributes: ['id', 'area_id', 'locale', 'title'],
-      },
-      {
-        model: sequelize.models.DeliveryPrice,
-        as: 'deliveryPrice',
-        required: filter.has_price || false,
-      },
-    ],
-    where: {
-      ...(filter.region_id && { region_id: filter.region_id }),
-      ...(filter.country_id && { country_id: filter.country_id }),
-      ...(filter.city_id && { city_id: filter.city_id }),
-      ...(typeof filter.active !== 'undefined' && { active: filter.active }),
+module.exports = (sequelize) => {
+  const Area = sequelize.define('Area', {
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true,
     },
-  };
-});
+    active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    region_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
+    country_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
+    city_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
+  }, {
+    tableName: 'areas',
+    timestamps: false,
+    underscored: true,
+  });
 
-module.exports = Area;
+  Area.associate = (models) => {
+    Area.belongsTo(models.Region, {
+      foreignKey: 'region_id',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    Area.belongsTo(models.Country, {
+      foreignKey: 'country_id',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    Area.belongsTo(models.City, {
+      foreignKey: 'city_id',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    Area.hasMany(models.UserAddress, {
+      foreignKey: 'area_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    Area.hasMany(models.DeliveryPoint, {
+      foreignKey: 'area_id',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    Area.hasMany(models.DeliveryPrice, {
+      foreignKey: 'area_id',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return Area;
+};

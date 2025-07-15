@@ -1,47 +1,49 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+// models/referral.js
 
-const Referral = sequelize.define('Referral', {
-  id: {
-    type: DataTypes.BIGINT,       // ✅ BIGINT to match PostgreSQL BIGSERIAL
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  price_from: {
-    type: DataTypes.DOUBLE,
-    allowNull: true,              // ✅ should be NULLABLE as per DB
-  },
-  price_to: {
-    type: DataTypes.DOUBLE,
-    allowNull: true,              // ✅ should be NULLABLE as per DB
-  },
-  expired_at: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  img: {
-    type: DataTypes.STRING,
-    allowNull: true,              // ✅ should be NULLABLE as per DB
-  },
-  created_at: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  updated_at: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-}, {
-  tableName: 'referrals',
-  timestamps: true,               // ✅ Sequelize timestamps enabled
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-});
+module.exports = (sequelize, DataTypes) => {
+  const Referral = sequelize.define('Referral', {
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    price_from: {
+      type: DataTypes.DOUBLE,
+      allowNull: true
+    },
+    price_to: {
+      type: DataTypes.DOUBLE,
+      allowNull: true
+    },
+    expired_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    img: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    }
+  }, {
+    tableName: 'referrals',
+    timestamps: false
+  });
 
-// Relationships
-Referral.associate = (models) => {
-  Referral.hasMany(models.ReferralTranslation, { as: 'translations', foreignKey: 'referral_id' });
-  Referral.hasOne(models.ReferralTranslation, { as: 'translation', foreignKey: 'referral_id' });
+  Referral.associate = (models) => {
+    Referral.hasMany(models.ReferralTranslation, {
+      foreignKey: 'referral_id',
+      as: 'translations',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
+    });
+  };
+
+  return Referral;
 };
-
-module.exports = Referral;
