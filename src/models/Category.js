@@ -88,7 +88,7 @@ module.exports = (sequelize, DataTypes) => {
     Category.hasMany(models.CategoryTranslation, {
       foreignKey: 'category_id',
       as: 'translations',
-    });
+    })
 
     // Category has many meta tags (polymorphic association)
     Category.hasMany(models.CategoryMetaTag, {

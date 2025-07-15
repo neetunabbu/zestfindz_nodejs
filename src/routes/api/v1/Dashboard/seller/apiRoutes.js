@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const CategoryController = require('../../../../../controllers/Api/v1/dashboard/seller/categoryController');
 const sequelize = require('../../../../../config/db');
-const multer = require('multer');
+const upload = require('../../../../../helpers/ImageUpload');
 
-// Dummy auth middleware
+
 const authMiddleware = (req, res, next) => {
   req.userId = 1;
   next();
@@ -15,8 +15,8 @@ const categoryController = CategoryController(sequelize);
 
 // Routes
 router.get('/categories', categoryController.index);
-router.post('/categories', authMiddleware, categoryController.store);
-router.put('/categories/:uuid', authMiddleware, categoryController.update);
+router.post('/categories', authMiddleware, upload.single('image'), categoryController.store);
+router.put('/categories/:uuid', authMiddleware, upload.single('image'), categoryController.update);
 router.delete('/categories/:uuid', authMiddleware, categoryController.destroy);
 
 

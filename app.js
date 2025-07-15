@@ -3,9 +3,11 @@ const express = require('express');
 const app = express();
 require('dotenv').config(); 
 const cors = require('cors');
+const path = require('path');
 
 app.use(express.json());
 app.use(cors());
+app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
 
 app.get('/', (req, res) => {
     res.send('✅ Welcome to Zestfindz API');
