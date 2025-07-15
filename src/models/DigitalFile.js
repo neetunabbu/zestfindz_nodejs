@@ -1,50 +1,49 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+// models/digital_file.js
 
-class DigitalFile extends Model {}
+const { DataTypes } = require('sequelize');
 
-DigitalFile.init({
-  id: {
-    type: DataTypes.BIGINT,   // matches BIGSERIAL
-    primaryKey: true,
-    autoIncrement: true,
-    allowNull: false
-  },
-  product_id: {
-    type: DataTypes.BIGINT,   // BIGINT and NOT NULL
-    allowNull: false
-  },
-  path: {
-    type: DataTypes.STRING(255),
-    allowNull: false
-  },
-  active: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false
-  },
-  created_at: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  updated_at: {
-    type: DataTypes.DATE,
-    allowNull: true
-  }
-}, {
-  sequelize,
-  modelName: 'DigitalFile',
-  tableName: 'digital_files',
-  timestamps: false,
-  underscored: true,
-  freezeTableName: true
-});
+module.exports = (sequelize) => {
+  const DigitalFile = sequelize.define('DigitalFile', {
+    id: {
+      type: DataTypes.BIGINT,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    product_id: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
+    path: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+    },
+  }, {
+    tableName: 'digital_files',
+    underscored: true,
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  });
 
-// ⚠️ Remove or comment out associations if not required (as per your earlier no-association request)
-// DigitalFile.associate = (models) => {
-//   this.belongsTo(models.Product, { foreignKey: 'product_id' });
-//   this.hasOne(models.UserDigitalFile, { foreignKey: 'digital_file_id', as: 'userDigital' });
-//   this.hasMany(models.UserDigitalFile, { foreignKey: 'digital_file_id', as: 'usersDigital' });
-// };
+  DigitalFile.associate = (models) => {
+    DigitalFile.belongsTo(models.Product, {
+      foreignKey: 'product_id',
+      as: 'product',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
 
-module.exports = DigitalFile;
+  return DigitalFile;
+};

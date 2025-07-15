@@ -1,59 +1,62 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
-const Referral = require('./Referral');
+// models/referral_translation.js
 
-class ReferralTranslation extends Model {}
-
-ReferralTranslation.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const ReferralTranslation = sequelize.define('ReferralTranslation', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
-      autoIncrement: true,
-      allowNull: false,
+      autoIncrement: true
     },
     referral_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false
     },
     title: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.STRING(255),
+      allowNull: false
     },
     locale: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.STRING(255),
+      allowNull: false
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: true
     },
     faq: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: true
     },
     created_at: {
       type: DataTypes.DATE,
-      allowNull: true,
+      allowNull: true
     },
     updated_at: {
       type: DataTypes.DATE,
-      allowNull: true,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'ReferralTranslation',
+      allowNull: true
+    }
+  }, {
     tableName: 'referral_translations',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    freezeTableName: true,
-    // ⚠️ Removed paranoid: true since no deleted_at exists in DB
-  }
-);
+    timestamps: false,
+    indexes: [
+      {
+        unique: true,
+        fields: ['referral_id', 'locale']
+      },
+      {
+        fields: ['locale']
+      }
+    ]
+  });
 
-// Relationships
-ReferralTranslation.belongsTo(Referral, { as: 'referral', foreignKey: 'referral_id' });
+  ReferralTranslation.associate = (models) => {
+    ReferralTranslation.belongsTo(models.Referral, {
+      foreignKey: 'referral_id',
+      as: 'referral',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
+    });
+  };
 
-module.exports = ReferralTranslation;
+  return ReferralTranslation;
+};

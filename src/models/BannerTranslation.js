@@ -1,22 +1,17 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
-
-class BannerTranslation extends Model {}
-
-BannerTranslation.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const BannerTranslation = sequelize.define('BannerTranslation', {
     id: {
-      type: DataTypes.BIGINT, // should match BIGSERIAL
-      autoIncrement: true,
+      type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
+      autoIncrement: true,
       allowNull: false,
     },
     banner_id: {
-      type: DataTypes.BIGINT, // match your BIGINT column
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
     },
     locale: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     title: {
@@ -24,28 +19,36 @@ BannerTranslation.init(
       allowNull: false,
     },
     description: {
-      type: DataTypes.TEXT, // fix: TEXT in db, so TEXT here
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     button_text: {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'BannerTranslation',
+  }, {
     tableName: 'banner_translations',
-    timestamps: false, // Match Laravel $timestamps = false
-  }
-);
-
-// ✅ Associations
-BannerTranslation.associate = (models) => {
-  BannerTranslation.belongsTo(models.Banner, {
-    foreignKey: 'banner_id',
-    as: 'banner',
+    timestamps: false,
+    underscored: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['banner_id', 'locale']
+      },
+      {
+        fields: ['locale']
+      }
+    ]
   });
-};
 
-module.exports = BannerTranslation;
+  BannerTranslation.associate = (models) => {
+    BannerTranslation.belongsTo(models.Banner, {
+      foreignKey: 'banner_id',
+      as: 'banner',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return BannerTranslation;
+};

@@ -1,48 +1,53 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
-
-class BlogTranslation extends Model {}
-
-BlogTranslation.init(
-  {
+// models/banner_translation.js
+module.exports = (sequelize, DataTypes) => {
+  const BannerTranslation = sequelize.define('BannerTranslation', {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
-      allowNull: false,
+      autoIncrement: true,
     },
-    blog_id: {
-      type: DataTypes.INTEGER,
+    banner_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
     },
     locale: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     title: {
-      type: DataTypes.STRING(191), // matches VARCHAR(191)
+      type: DataTypes.STRING(191),
       allowNull: false,
     },
-    short_desc: {
-      type: DataTypes.STRING(191),
-      allowNull: true,
-    },
     description: {
-      type: DataTypes.TEXT, // ✅ fixed: TEXT to match PostgreSQL table
+      type: DataTypes.TEXT,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'BlogTranslation',
-    tableName: 'blog_translations',
-    timestamps: false, // as per your Laravel $timestamps = false
-  }
-);
+    button_text: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    }
+  }, {
+    tableName: 'banner_translations',
+    timestamps: false,
+    indexes: [
+      {
+        unique: true,
+        fields: ['banner_id', 'locale']
+      },
+      {
+        fields: ['locale']
+      }
+    ]
+  });
 
-// ✅ Associations (optional)
-BlogTranslation.associate = (models) => {
-  BlogTranslation.belongsTo(models.Blog, { foreignKey: 'blog_id', as: 'blog' });
+  BannerTranslation.associate = (models) => {
+    BannerTranslation.belongsTo(models.Banner, {
+      foreignKey: 'banner_id',
+      as: 'banner',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
+    });
+  };
+
+  return BannerTranslation;
 };
-
-module.exports = BlogTranslation;

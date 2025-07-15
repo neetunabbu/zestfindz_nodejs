@@ -1,151 +1,126 @@
-const { Sequelize, Op } = require('sequelize');
-const LoggableMixin = require('./loggableMixin');
+const { Op, fn, col, literal } = require('sequelize');
+const db = require('../models');
 
-// Utility function to mimic Laravel's data_get
-const dataGet = (obj, key, defaultValue = null) => {
-  const keys = key.split('.');
-  let result = obj;
-  for (const k of keys) {
-    result = result && typeof result === 'object' ? result[k] : undefined;
-    if (result === undefined) return defaultValue;
+class Utility {
+  /**
+   * Paginate an array of items
+   * @param {Array} items
+   * @param {number} perPage
+   * @param {number} page
+   * @returns {{data: Array, meta: object}}
+   */
+  static paginate(items, perPage, page = 1) {
+    const offset = (page - 1) * perPage;
+    const paginatedItems = items.slice(offset, offset + perPage);
+    const total = items.length;
+
+    return {
+      data: paginatedItems,
+      meta: {
+        total,
+        perPage,
+        currentPage: page,
+        lastPage: Math.ceil(total / perPage),
+      },
+    };
   }
-  return result;
-};
 
-// Helper for utility functions
-const Utility = (sequelize) => {
-  const ParcelOrderSettingModel = sequelize.models.ParcelOrderSetting;
-  const ReviewModel = sequelize.models.Review;
+  /**
+   * Calculate parcel price based on distance
+   * @param {object} setting - ParcelOrderSetting instance
+   * @param {number|null} km
+   * @param {number|null} rate
+   * @returns {number|null}
+   */
+  static getParcelPriceByDistance(setting, km = 0, rate = 1) {
+    if (!setting) return null;
 
-  return {
-    // Paginate an array of items
-    paginate(items = [], perPage, page = null, options = {}) {
-      LoggableMixin.error(new Error(`[Utility] paginate called: perPage=${perPage}, page=${page}`));
+    const price = setting.special ? setting.special_price : setting.price;
+    const pricePerKm = setting.special ? setting.special_price_per_km : setting.price_per_km;
 
-      try {
-        perPage = parseInt(perPage, 10) || 10;
-        page = parseInt(page, 10) || 1;
-        const total = items.length;
-        const offset = (page - 1) * perPage;
-        const paginatedItems = items.slice(offset, offset + perPage);
+    return Math.round((price + (pricePerKm * km)) * rate * 100) / 100;
+  }
 
-        return {
-          data: paginatedItems,
-          current_page: page,
-          per_page: perPage,
-          total,
-          last_page: Math.ceil(total / perPage),
-          ...options
-        };
-      } catch (error) {
-        LoggableMixin.error(new Error(`[Utility] Error in paginate: ${error.message}`));
-        throw error;
-      }
-    },
+  /**
+   * Calculate Haversine distance in KM
+   * @param {object} origin - {latitude, longitude}
+   * @param {object} destination - {latitude, longitude}
+   * @returns {number}
+   */
+  static getDistance(origin, destination) {
+    const toRadian = (deg = 0) => (deg * Math.PI) / 180;
 
-    // Calculate parcel price based on distance and rate
-    async getParcelPriceByDistance(parcelOrderSetting, km = 0, rate = 1) {
-      LoggableMixin.error(new Error(`[Utility] getParcelPriceByDistance called: parcelOrderSetting_id=${parcelOrderSetting?.id}, km=${km}, rate=${rate}`));
-
-      try {
-        const price = parcelOrderSetting.special ? parcelOrderSetting.special_price : parcelOrderSetting.price;
-        const pricePerKm = parcelOrderSetting.special ? parcelOrderSetting.special_price_per_km : parcelOrderSetting.price_per_km;
-
-        return parseFloat(((price + (pricePerKm * km)) * rate).toFixed(2));
-      } catch (error) {
-        LoggableMixin.error(new Error(`[Utility] Error in getParcelPriceByDistance: ${error.message}`));
-        throw error;
-      }
-    },
-
-    // Calculate distance between two coordinates using Haversine formula
-    getDistance(origin = {}, destination = {}) {
-      LoggableMixin.error(new Error(`[Utility] getDistance called: origin=${JSON.stringify(origin)}, destination=${JSON.stringify(destination)}`));
-
-      try {
-        if (
-          !dataGet(origin, 'latitude') || !dataGet(origin, 'longitude') ||
-          !dataGet(destination, 'latitude') || !dataGet(destination, 'longitude')
-        ) {
-          return 0;
-        }
-
-        const toRadian = (degree = 0) => (degree * Math.PI) / 180;
-
-        const originLat = toRadian(dataGet(origin, 'latitude'));
-        const originLong = toRadian(dataGet(origin, 'longitude'));
-        const destinationLat = toRadian(dataGet(destination, 'latitude'));
-        const destinationLong = toRadian(dataGet(destination, 'longitude'));
-
-        const deltaLat = destinationLat - originLat;
-        const deltaLon = destinationLong - originLong;
-
-        const delta = Math.pow(Math.sin(deltaLat / 2), 2);
-        const cos = Math.cos(destinationLong) * Math.cos(destinationLat);
-
-        const sqrt = delta + cos * Math.pow(Math.sin(deltaLon / 2), 2);
-        const asin = 2 * Math.asin(Math.sqrt(sqrt));
-
-        const earthRadius = 6371; // Earth's radius in km
-
-        const distance = asin * earthRadius;
-        return isNaN(distance) ? 1 : parseFloat(distance.toFixed(2));
-      } catch (error) {
-        LoggableMixin.error(new Error(`[Utility] Error in getDistance: ${error.message}`));
-        throw error;
-      }
-    },
-
-    // Group reviews by rating
-    groupRating(reviews = []) {
-      LoggableMixin.error(new Error(`[Utility] groupRating called: reviews_count=${reviews.length}`));
-
-      try {
-        const result = { 1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0 };
-
-        for (const review of reviews) {
-          const rating = parseInt(dataGet(review, 'rating'), 10);
-          if (result[rating]) {
-            result[rating] += dataGet(review, 'count', 0);
-          } else {
-            result[rating] = dataGet(review, 'count', 0);
-          }
-        }
-
-        return result;
-      } catch (error) {
-        LoggableMixin.error(new Error(`[Utility] Error in groupRating: ${error.message}`));
-        throw error;
-      }
-    },
-
-    // Fetch and group review ratings
-    async reviewsGroupRating(where = {}) {
-      LoggableMixin.error(new Error(`[Utility] reviewsGroupRating called: where=${JSON.stringify(where)}`));
-
-      try {
-        const reviews = await ReviewModel.findAll({
-          where,
-          attributes: [
-            [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'],
-            [Sequelize.fn('SUM', Sequelize.col('rating')), 'rating'],
-            'rating'
-          ],
-          group: ['rating'],
-          raw: true
-        });
-
-        const group = this.groupRating(reviews);
-        const count = reviews.reduce((sum, review) => sum + (review.count || 0), 0);
-        const avg = reviews.length > 0 ? parseFloat((reviews.reduce((sum, review) => sum + (review.rating || 0), 0) / reviews.length).toFixed(1)) : 0.0;
-
-        return { group, count, avg };
-      } catch (error) {
-        LoggableMixin.error(new Error(`[Utility] Error in reviewsGroupRating: ${error.message}`));
-        throw error;
-      }
+    if (
+      !origin.latitude || !origin.longitude ||
+      !destination.latitude || !destination.longitude
+    ) {
+      return 0;
     }
-  };
-};
+
+    const originLat = toRadian(origin.latitude);
+    const originLon = toRadian(origin.longitude);
+    const destLat = toRadian(destination.latitude);
+    const destLon = toRadian(destination.longitude);
+
+    const deltaLat = destLat - originLat;
+    const deltaLon = originLon - destLon;
+
+    const delta = Math.pow(Math.sin(deltaLat / 2), 2);
+    const cos = Math.cos(destLon) * Math.cos(destLat);
+    const sqrt = delta + cos * Math.pow(Math.sin(deltaLon / 2), 2);
+    const asin = 2 * Math.asin(Math.sqrt(sqrt));
+    const earthRadius = 6371; // in kilometers
+
+    return isNaN(asin) ? 1 : Math.round(asin * earthRadius * 100) / 100;
+  }
+
+  /**
+   * Group review ratings (e.g., 1–5 stars)
+   * @param {Array} reviews
+   * @returns {object}
+   */
+  static groupRating(reviews) {
+    const result = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    reviews.forEach(review => {
+      const rating = parseInt(review.rating);
+      const count = parseInt(review.count || 0);
+
+      if (result.hasOwnProperty(rating)) {
+        result[rating] += count;
+      } else {
+        result[rating] = count;
+      }
+    });
+
+    return result;
+  }
+
+  /**
+   * Get rating statistics from reviews table
+   * @param {object} where - Sequelize where clause
+   * @returns {Promise<{group: object, count: number, avg: number}>}
+   */
+  static async reviewsGroupRating(where = {}) {
+    const reviews = await db.Review.findAll({
+      where,
+      attributes: [
+        [fn('count', col('id')), 'count'],
+        [fn('sum', col('rating')), 'rating'],
+        'rating'
+      ],
+      group: ['rating'],
+      raw: true
+    });
+
+    const group = Utility.groupRating(reviews);
+    const totalCount = reviews.reduce((sum, r) => sum + parseInt(r.count || 0), 0);
+    const avgRating = totalCount > 0
+      ? parseFloat((reviews.reduce((sum, r) => sum + parseFloat(r.rating || 0), 0) / reviews.length).toFixed(1))
+      : 0.0;
+
+    return { group, count: totalCount, avg: avgRating };
+  }
+}
 
 module.exports = Utility;

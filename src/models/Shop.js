@@ -129,6 +129,12 @@ module.exports = (sequelize, DataTypes) => {
 
   Shop.associate = (models) => {
     Shop.belongsTo(models.User, { as: 'seller', foreignKey: 'user_id' });
+
+    Shop.hasMany(models.ShopAdsPackage, {
+      foreignKey: 'shop_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
+    });
   };
 
   return Shop;
