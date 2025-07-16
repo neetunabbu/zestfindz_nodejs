@@ -1,5 +1,5 @@
 const { userResource } = require('./userResource');
-const { modelLogDataResource } = require('./modelLogDataResource');
+const { modelLogDataResource } = require('./ModelLogDataResource');
 
 function modelLogResource(log) {
   return {

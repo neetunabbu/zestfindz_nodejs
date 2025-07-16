@@ -1,60 +1,27 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
-const User = require('./User');
-const Category = require('./Category');
-const Product = require('./Product');
+const { DataTypes } = require('sequelize');
 
-class RequestModel extends Model {
-  static CATEGORY = 'category';
-  static PRODUCT = 'product';
-  static USER = 'user';
-
-  static STATUS_PENDING = 'pending';
-  static STATUS_APPROVED = 'approved';
-  static STATUS_CANCELED = 'canceled';
-
-  static TYPES = {
-    [RequestModel.CATEGORY]: 'Category',
-    [RequestModel.PRODUCT]: 'Product',
-    [RequestModel.USER]: 'User',
-  };
-
-  static BY_TYPES = {
-    ['Category']: RequestModel.CATEGORY,
-    ['Product']: RequestModel.PRODUCT,
-    ['User']: RequestModel.USER,
-  };
-
-  static STATUSES = {
-    [RequestModel.STATUS_PENDING]: RequestModel.STATUS_PENDING,
-    [RequestModel.STATUS_APPROVED]: RequestModel.STATUS_APPROVED,
-    [RequestModel.STATUS_CANCELED]: RequestModel.STATUS_CANCELED,
-  };
-}
-
-RequestModel.init(
-  {
+module.exports = (sequelize) => {
+  const RequestModel = sequelize.define('RequestModel', {
     id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
+      type: DataTypes.BIGINT,
       autoIncrement: true,
-      allowNull: false,
+      primaryKey: true,
     },
     model_type: {
       type: DataTypes.STRING,
-      allowNull: true, // Matches DB default NULL
+      allowNull: true,
     },
     model_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Matches DB default NULL
+      type: DataTypes.BIGINT,
+      allowNull: true,
     },
     created_by: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Matches DB default NULL
+      type: DataTypes.BIGINT,
+      allowNull: true,
     },
     data: {
       type: DataTypes.JSONB,
-      allowNull: true, // Matches DB default NULL
+      allowNull: true,
     },
     status: {
       type: DataTypes.STRING,
@@ -63,7 +30,7 @@ RequestModel.init(
     },
     status_note: {
       type: DataTypes.STRING,
-      allowNull: true, // Matches DB default NULL
+      allowNull: true,
     },
     created_at: {
       type: DataTypes.DATE,
@@ -73,19 +40,21 @@ RequestModel.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'RequestModel',
+  }, {
     tableName: 'request_models',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    freezeTableName: true,
-  }
-);
+    underscored: true,
+    timestamps: false,
+  });
 
-// Relationships
-RequestModel.belongsTo(User, { as: 'createdBy', foreignKey: 'created_by' });
+  // Associations
+  RequestModel.associate = (models) => {
+    RequestModel.belongsTo(models.User, {
+      foreignKey: 'created_by',
+      as: 'creator',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
 
-module.exports = RequestModel;
+  return RequestModel;
+};
