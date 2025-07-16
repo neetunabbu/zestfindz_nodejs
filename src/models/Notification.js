@@ -1,56 +1,42 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+// models/Notification.js
 
-class Notification extends Model {
-    static PUSH = 'push';
-
-    static TYPES = {
-        [Notification.PUSH]: Notification.PUSH,
-    };
-}
-
-Notification.init(
-    {
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true,
-            allowNull: false,
-        },
-        type: {
-            type: DataTypes.STRING(50),
-            allowNull: false,
-        },
-        payload: {
-            type: DataTypes.JSONB,  // Should match JSONB in PG
-            allowNull: true,        // match DB default NULL
-        },
-        created_at: {
-            type: DataTypes.DATE,
-            allowNull: true,       // match DB default NULL
-        },
-        updated_at: {
-            type: DataTypes.DATE,
-            allowNull: true,       // match DB default NULL
-        },
+module.exports = (sequelize, DataTypes) => {
+  const Notification = sequelize.define('Notification', {
+    id: {
+      type: DataTypes.BIGINT,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
     },
-    {
-        sequelize,
-        modelName: 'Notification',
-        tableName: 'notifications',
-        underscored: true,
-        timestamps: false, // Because timestamps are manually handled (not sequelize auto fields)
+    type: {
+      type: DataTypes.ENUM('push'),
+      allowNull: false,
+      unique: true,
+    },
+    payload: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      validate: {
+        isJson(value) {
+          if (value !== null && typeof value !== 'object') {
+            throw new Error('Payload must be a valid JSON object');
+          }
+        }
+      }
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
     }
-);
+  }, {
+    tableName: 'notifications',
+    timestamps: false,
+    underscored: true,
+  });
 
-// If you're using this — create notification_user table too
-Notification.associate = (models) => {
-    Notification.belongsToMany(models.User, {
-        through: 'notification_user',
-        as: 'users',
-        foreignKey: 'notification_id',
-        otherKey: 'user_id',
-    });
+  return Notification;
 };
-
-module.exports = Notification;

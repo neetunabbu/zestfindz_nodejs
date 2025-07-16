@@ -1,5 +1,5 @@
-const galleryResource = require('./galleryResource');
-const translationResource = require('./translationResource');
+const galleryResource = require('./GalleryResource');
+const translationResource = require('./TranslationResource');
 
 const adsPackageProductsResource = (adsPackage) => {
     const locales = adsPackage.translations

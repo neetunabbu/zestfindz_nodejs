@@ -1,8 +1,4 @@
-/**
- * CurrencyResource - transforms a Currency model instance into an API-friendly format
- * @param {Object} currency - Sequelize model instance (Currency)
- * @returns {Object} - formatted response object
- */
+
 const CurrencyResource = (currency) => {
   if (!currency) return null;
 
