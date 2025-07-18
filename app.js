@@ -45,9 +45,12 @@ app.use('/api/v1/auth', userLoginRoutes);
 
 const restRoutes = require('./src/routes/api/v1/rest.routes');
 app.use('/api/v1/rest', restRoutes);
-
-const apiRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
-app.use('/api/v1/seller', apiRoutes);
+// seller Routes
+const sellerApiRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
+app.use('/api/v1', sellerApiRoutes);
+// Admin Routes
+const adminApiRoutes = require('./src/routes/api/v1/Dashboard/admin/apiRoutes');
+app.use('/api/v1', adminApiRoutes);
 
 app.get('/test', (req, res) => {
     console.log("testing");

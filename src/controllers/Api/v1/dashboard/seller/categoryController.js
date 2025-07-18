@@ -7,10 +7,7 @@ const CategoryController = (sequelize) => {
   const { v4: uuidv4 } = require('uuid');
   const ApiResponse = require('../../../../../Traits/ApiResponse');
   const Loggable = require('../../../../../Traits/Loggable');
-  
-
   const types = ['main', 'sub_main', 'child', 'receipt'];
-
   const transformCategory = (category) => ({
     id: category.id,
     uuid: category.uuid,

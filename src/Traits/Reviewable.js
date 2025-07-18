@@ -1,207 +1,161 @@
-const { DataTypes, Sequelize } = require('sequelize');
-const LoggableMixin = require('./loggableMixin');
+const Review = require('../models/Review');
+const User = require('../models/User');
+const { Op, fn, col } = require('sequelize');
+const auth = require('../utils/auth'); 
 
-// Utility function to mimic Laravel's data_get
-const dataGet = (obj, key, defaultValue = null) => {
-  const keys = key.split('.');
-  let result = obj;
-  for (const k of keys) {
-    result = result && typeof result === 'object' ? result[k] : undefined;
-    if (result === undefined) return defaultValue;
-  }
-  return result;
-};
+const Reviewable = {
+  async addReview(instance, collection, reqUser) {
+    const userId = reqUser?.id;
+    if (!userId) throw new Error('Unauthorized');
 
-// Mixin for reviewable functionality
-const Reviewable = (sequelize) => {
-  return {
-    // Define the morphMany and morphOne relationships with Review model
-    defineRelationships: (Model, ReviewModel) => {
-      // MorphMany: reviews
-      Model.hasMany(ReviewModel, {
-        foreignKey: {
-          name: 'reviewable_id',
-          type: DataTypes.BIGINT, // Matches assumed model ID type
-          allowNull: false
+    const [review] = await Review.findOrCreate({
+      where: {
+        userId: userId,
+        reviewableId: instance.id,
+        reviewableType: instance.constructor.name
+      },
+      defaults: {
+        rating: collection.rating,
+        comment: collection.comment
+      }
+    });
+
+    if (!review.isNewRecord) {
+      review.rating = collection.rating;
+      review.comment = collection.comment;
+      await review.save();
+    }
+
+    await Reviewable.selfUpdate(instance, collection, review, reqUser);
+  },
+
+  async addAssignReview(instance, collection, assignable, reqUser) {
+    const userId = reqUser?.id;
+    if (!userId) throw new Error('Unauthorized');
+
+    const [review] = await Review.findOrCreate({
+      where: {
+        userId,
+        reviewableId: instance.id,
+        reviewableType: instance.constructor.name,
+        assignableId: assignable.id,
+        assignableType: assignable.constructor.name
+      },
+      defaults: {
+        rating: collection.rating,
+        comment: collection.comment
+      }
+    });
+
+    if (!review.isNewRecord) {
+      review.rating = collection.rating;
+      review.comment = collection.comment;
+      await review.save();
+    }
+
+    if (assignable.id !== instance.id) {
+      const result = await Review.findAll({
+        attributes: [
+          [fn('COUNT', col('id')), 'count'],
+          [fn('SUM', col('rating')), 'sum'],
+          [fn('AVG', col('rating')), 'avg']
+        ],
+        where: {
+          assignableId: assignable.id,
+          assignableType: assignable.constructor.name
         },
-        constraints: false,
-        scope: {
-          reviewable_type: Model.name
-        },
-        as: 'reviews'
+        raw: true
       });
 
-      // MorphOne: review
-      Model.hasOne(ReviewModel, {
-        foreignKey: {
-          name: 'reviewable_id',
-          type: DataTypes.BIGINT, // Matches assumed model ID type
-          allowNull: false
-        },
-        constraints: false,
-        scope: {
-          reviewable_type: Model.name
-        },
-        as: 'review'
+      const stats = result[0];
+
+      await assignable.update({
+        r_count: stats?.count || 0,
+        r_sum: parseFloat(stats?.sum || 0).toFixed(1),
+        r_avg: parseFloat(stats?.avg || 0).toFixed(1)
       });
-    },
+    }
 
-    // Add a review
-    async addReview(instance, collection, userId) {
-      LoggableMixin.error(new Error(`[Reviewable] addReview called: model_id=${instance.id}, user_id=${userId}`));
+    await Reviewable.selfUpdate(instance, collection, review, reqUser);
+  },
 
-      const ReviewModel = sequelize.models.Review;
-
-      try {
-        const review = await ReviewModel.upsert(
-          {
-            user_id: userId,
-            reviewable_id: instance.id,
-            reviewable_type: instance.constructor.name,
-            rating: dataGet(collection, 'rating'),
-            comment: dataGet(collection, 'comment')
-          },
-          {
-            returning: true,
-            conflictFields: ['user_id', 'reviewable_id', 'reviewable_type']
-          }
-        );
-
-        await this.selfUpdate(instance, collection, review[0]);
-      } catch (error) {
-        LoggableMixin.error(new Error(`[Reviewable] Error in addReview: ${error.message}`));
-        throw error;
+  async reviews(instance) {
+    return Review.findAll({
+      where: {
+        reviewableId: instance.id,
+        reviewableType: instance.constructor.name
       }
-    },
+    });
+  },
 
-    // Add an assigned review
-    async addAssignReview(instance, collection, assignable, userId) {
-      LoggableMixin.error(new Error(`[Reviewable] addAssignReview called: model_id=${instance.id}, assignable_id=${assignable.id}, user_id=${userId}`));
+  async review(instance) {
+    return Review.findOne({
+      where: {
+        reviewableId: instance.id,
+        reviewableType: instance.constructor.name
+      },
+      order: [['id', 'DESC']]
+    });
+  },
 
-      const ReviewModel = sequelize.models.Review;
+  async selfUpdate(instance, collection, review, reqUser) {
+    const userId = reqUser?.id;
+    if (!userId) return;
 
-      try {
-        const review = await ReviewModel.upsert(
-          {
-            user_id: userId,
-            reviewable_id: instance.id,
-            reviewable_type: instance.constructor.name,
-            assignable_id: assignable.id,
-            assignable_type: assignable.constructor.name,
-            rating: dataGet(collection, 'rating'),
-            comment: dataGet(collection, 'comment')
-          },
-          {
-            returning: true,
-            conflictFields: ['user_id', 'reviewable_id', 'reviewable_type', 'assignable_id', 'assignable_type']
-          }
-        );
+    const [reviewStats, userStats] = await Promise.all([
+      Review.findAll({
+        attributes: [
+          [fn('COUNT', col('id')), 'count'],
+          [fn('SUM', col('rating')), 'sum'],
+          [fn('AVG', col('rating')), 'avg']
+        ],
+        where: {
+          reviewableId: instance.id,
+          reviewableType: instance.constructor.name
+        },
+        raw: true
+      }),
+      Review.findAll({
+        attributes: [
+          [fn('COUNT', col('id')), 'count'],
+          [fn('SUM', col('rating')), 'sum'],
+          [fn('AVG', col('rating')), 'avg']
+        ],
+        where: {
+          userId
+        },
+        raw: true
+      })
+    ]);
 
-        if (assignable.id !== instance.id) {
-          const assignableReviews = await ReviewModel.findOne({
-            attributes: [
-              [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'],
-              [Sequelize.fn('SUM', Sequelize.col('rating')), 'sum'],
-              [Sequelize.fn('AVG', Sequelize.col('rating')), 'avg']
-            ],
-            where: {
-              assignable_id: assignable.id,
-              assignable_type: assignable.constructor.name
-            }
-          });
+    const reviewStat = reviewStats[0];
+    const userStat = userStats[0];
 
-          await assignable.update({
-            r_count: assignableReviews.get('count') || 0,
-            r_sum: Math.round((assignableReviews.get('sum') || 0) * 10) / 10,
-            r_avg: Math.round((assignableReviews.get('avg') || 0) * 10) / 10
-          });
-        }
+    await instance.update({
+      r_count: reviewStat?.count || 0,
+      r_sum: parseFloat(reviewStat?.sum || 0).toFixed(1),
+      r_avg: parseFloat(reviewStat?.avg || 0).toFixed(1)
+    });
 
-        await this.selfUpdate(instance, collection, review[0]);
-      } catch (error) {
-        LoggableMixin.error(new Error(`[Reviewable] Error in addAssignReview: ${error.message}`));
-        throw error;
-      }
-    },
+    const user = await User.findByPk(userId);
+    if (user) {
+      await user.update({
+        r_count: userStat?.count || 0,
+        r_sum: parseFloat(userStat?.sum || 0).toFixed(1),
+        r_avg: parseFloat(userStat?.avg || 0).toFixed(1)
+      });
+    }
 
-    // Update review statistics and handle images
-    async selfUpdate(instance, collection, review) {
-      LoggableMixin.error(new Error(`[Reviewable] selfUpdate called: model_id=${instance.id}, review_id=${review.id}`));
+    if (collection?.images?.length > 0) {
+      await review.galleries?.destroy({ where: { reviewId: review.id } });
 
-      const ReviewModel = sequelize.models.Review;
-      const UserModel = sequelize.models.User;
-      const GalleryModel = sequelize.models.Gallery;
+      await review.update({ img: collection.images[0] });
 
-      try {
-        // Update reviewable model stats
-        const reviews = await ReviewModel.findOne({
-          attributes: [
-            [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'],
-            [Sequelize.fn('SUM', Sequelize.col('rating')), 'sum'],
-            [Sequelize.fn('AVG', Sequelize.col('rating')), 'avg']
-          ],
-          where: {
-            reviewable_id: instance.id,
-            reviewable_type: instance.constructor.name
-          }
-        });
-
-        await instance.update({
-          r_count: reviews.get('count') || 0,
-          r_sum: Math.round((reviews.get('sum') || 0) * 10) / 10,
-          r_avg: Math.round((reviews.get('avg') || 0) * 10) / 10
-        });
-
-        // Update user stats
-        const userReviews = await ReviewModel.findOne({
-          attributes: [
-            [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'],
-            [Sequelize.fn('SUM', Sequelize.col('rating')), 'sum'],
-            [Sequelize.fn('AVG', Sequelize.col('rating')), 'avg']
-          ],
-          where: { user_id: review.user_id }
-        });
-
-        const user = await UserModel.findByPk(review.user_id);
-        if (user) {
-          await user.update({
-            r_count: userReviews.get('count') || 0,
-            r_sum: Math.round((userReviews.get('sum') || 0) * 10) / 10,
-            r_avg: Math.round((userReviews.get('avg') || 0) * 10) / 10
-          });
-        }
-
-        // Handle images (using LoadableMixin logic)
-        const images = dataGet(collection, 'images', []);
-        if (images.length > 0) {
-          // Delete existing galleries
-          await GalleryModel.destroy({
-            where: {
-              loadable_id: review.id,
-              loadable_type: ReviewModel.name
-            }
-          });
-
-          // Update review with first image
-          await review.update({
-            img: images[0]
-          });
-
-          // Upload images to galleries
-          for (const image of images) {
-            await GalleryModel.create({
-              path: image,
-              loadable_id: review.id,
-              loadable_type: ReviewModel.name
-            });
-          }
-        }
-      } catch (error) {
-        LoggableMixin.error(new Error(`[Reviewable] Error in selfUpdate: ${error.message}`));
-        throw error;
+      if (typeof review.uploads === 'function') {
+        await review.uploads(collection.images);
       }
     }
-  };
+  }
 };
 
 module.exports = Reviewable;
