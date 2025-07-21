@@ -1,44 +1,54 @@
+// models/shop_translation.js
+
 module.exports = (sequelize, DataTypes) => {
   const ShopTranslation = sequelize.define('ShopTranslation', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       autoIncrement: true,
       primaryKey: true,
-      allowNull: false,
     },
     shop_id: {
-      type: DataTypes.BIGINT, // Assuming shop_id is BIGINT to match Shop model's id
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
+      unique: true
     },
     locale: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(191),
       allowNull: false,
     },
     description: {
-      type: DataTypes.TEXT, // Use TEXT for potentially longer descriptions
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     address: {
-      type: DataTypes.STRING, // Assuming a reasonable length for address
+      type: DataTypes.TEXT,
       allowNull: true,
     },
   }, {
-    tableName: 'shop_translations', // Exact table name in the DB
-    timestamps: false, // As specified in the Laravel model
-    underscored: true, // Uses snake_case column names
-    freezeTableName: true, // Disables plural table name generation
+    tableName: 'shop_translations',
+    timestamps: false,
+    indexes: [
+      {
+        unique: true,
+        fields: ['shop_id', 'locale'],
+        name: 'shop_translations_shop_id_locale_unique',
+      },
+      {
+        fields: ['locale'],
+        name: 'shop_translations_locale_index',
+      }
+    ],
   });
 
-  // Define associations
   ShopTranslation.associate = (models) => {
-    // A ShopTranslation belongs to a Shop
     ShopTranslation.belongsTo(models.Shop, {
       foreignKey: 'shop_id',
-      as: 'shop',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
     });
   };
 

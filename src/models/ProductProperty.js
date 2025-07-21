@@ -1,52 +1,48 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
-
-class ProductProperty extends Model {}
-
-ProductProperty.init(
-  {
+// models/ProductProperty.js
+module.exports = (sequelize, DataTypes) => {
+  const ProductProperty = sequelize.define('ProductProperty', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
     },
     product_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     property_group_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     property_value_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // ✅ fixed this line to match DB
+      type: DataTypes.BIGINT,
+      allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'ProductProperty',
+  }, {
     tableName: 'product_properties',
-    underscored: true,
     timestamps: false,
-  }
-);
+    underscored: true,
+  });
 
-// Define associations
-ProductProperty.associate = (models) => {
-  ProductProperty.belongsTo(models.Product, {
-    foreignKey: 'product_id',
-    as: 'product',
-  });
-  ProductProperty.belongsTo(models.PropertyGroup, {
-    foreignKey: 'property_group_id',
-    as: 'group',
-  });
-  ProductProperty.belongsTo(models.PropertyValue, {
-    foreignKey: 'property_value_id',
-    as: 'value',
-  });
+  ProductProperty.associate = (models) => {
+    ProductProperty.belongsTo(models.Product, {
+      foreignKey: 'product_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    ProductProperty.belongsTo(models.PropertyGroup, {
+      foreignKey: 'property_group_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    ProductProperty.belongsTo(models.PropertyValue, {
+      foreignKey: 'property_value_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return ProductProperty;
 };
-
-module.exports = ProductProperty;

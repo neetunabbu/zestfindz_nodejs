@@ -1,26 +1,10 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
-const PropertyGroupTranslation = require('./PropertyGroupTranslation');
-const PropertyValue = require('./PropertyValue');
-const Shop = require('./Shop');
-
-class PropertyGroup extends Model {
-  static get TYPES() {
-    return ['color', 'text', 'image'];
-  }
-
-  getTypes() {
-    return PropertyGroup.TYPES;
-  }
-}
-
-PropertyGroup.init(
-  {
+// models/PropertyGroup.js
+module.exports = (sequelize, DataTypes) => {
+  const PropertyGroup = sequelize.define('PropertyGroup', {
     id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
+      type: DataTypes.BIGINT,
       autoIncrement: true,
-      allowNull: false,
+      primaryKey: true,
     },
     type: {
       type: DataTypes.STRING,
@@ -29,26 +13,41 @@ PropertyGroup.init(
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true, // ✅ corrected to match DB
+      defaultValue: true,
     },
     shop_id: {
-      type: DataTypes.BIGINT, // ✅ better to use BIGINT to match DB schema
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'PropertyGroup',
-    tableName: 'property_groups', // ✅ explicitly defining table name
+  }, {
+    tableName: 'property_groups',
     timestamps: false,
-    freezeTableName: true,
-  }
-);
+    underscored: true,
+  });
 
-// Relationships
-PropertyGroup.hasMany(PropertyGroupTranslation, { as: 'translations', foreignKey: 'property_group_id' }); // ✅ corrected foreign key
-PropertyGroup.hasOne(PropertyGroupTranslation, { as: 'translation', foreignKey: 'property_group_id' });   // ✅ corrected foreign key
-PropertyGroup.hasMany(PropertyValue, { as: 'propertyValues', foreignKey: 'property_group_id' });
-PropertyGroup.belongsTo(Shop, { as: 'shop', foreignKey: 'shop_id' });
+  PropertyGroup.associate = (models) => {
+    // Belongs to Shop
+    PropertyGroup.belongsTo(models.Shop, {
+      foreignKey: 'shop_id',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
 
-module.exports = PropertyGroup;
+    // Has many ProductProperty
+    PropertyGroup.hasMany(models.ProductProperty, {
+      foreignKey: 'property_group_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    // Has many PropertyValue
+    PropertyGroup.hasMany(models.PropertyValue, {
+      foreignKey: 'property_group_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return PropertyGroup;
+};
+

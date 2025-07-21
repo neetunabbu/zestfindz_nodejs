@@ -1,18 +1,14 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // your PostgreSQL connection
+// models/BackupHistory.js
 
-class BackupHistory extends Model {}
-
-BackupHistory.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const BackupHistory = sequelize.define('BackupHistory', {
     id: {
-      type: DataTypes.BIGINT, // match with BIGSERIAL
-      autoIncrement: true,
+      type: DataTypes.BIGINT,
       primaryKey: true,
-      allowNull: false,
+      autoIncrement: true,
     },
     title: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING,
       allowNull: false,
     },
     status: {
@@ -25,31 +21,26 @@ BackupHistory.init(
       allowNull: true,
     },
     created_by: {
-      type: DataTypes.BIGINT, // ✅ match PostgreSQL BIGINT
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     created_at: {
       type: DataTypes.DATE,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'BackupHistory',
+  }, {
     tableName: 'backup_histories',
-    timestamps: false, // ✅ Laravel compatibility
-    underscored: true, // optional: if using snake_case fields
-  }
-);
-
-// ✅ Associations
-BackupHistory.associate = (models) => {
-  BackupHistory.belongsTo(models.User, {
-    foreignKey: 'created_by',
-    as: 'user',
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
+    timestamps: false,
+    underscored: true,
   });
-};
 
-module.exports = BackupHistory;
+  BackupHistory.associate = (models) => {
+    BackupHistory.belongsTo(models.User, {
+      foreignKey: 'created_by',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return BackupHistory;
+};

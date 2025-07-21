@@ -1,34 +1,29 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+// models/faq_category.js
 
-class FaqCategory extends Model {
-  static associate(models) {
-    // Define relationships if any
-    this.hasMany(models.Faq, { foreignKey: 'category_id', sourceKey: 'id' });
-  }
-}
-
-FaqCategory.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const FaqCategory = sequelize.define('FaqCategory', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
     },
     name: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'FaqCategory',
+      allowNull: false
+    }
+  }, {
     tableName: 'faq_categories',
-    timestamps: false,
-    underscored: true,
-    freezeTableName: true,
-  }
-);
+    timestamps: false
+  });
 
-module.exports = FaqCategory;
+  FaqCategory.associate = (models) => {
+    FaqCategory.hasMany(models.Faq, {
+      foreignKey: 'category_id',
+      as: 'faqs',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE'
+    });
+  };
+
+  return FaqCategory;
+};

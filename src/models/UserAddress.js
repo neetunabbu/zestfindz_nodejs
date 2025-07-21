@@ -1,102 +1,133 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db');
 
-class UserAddress extends Model {}
+const { DataTypes } = require('sequelize');
 
-UserAddress.init({
-  id: {
-    type: DataTypes.BIGINT,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  title: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
-  },
-  user_id: {
-    type: DataTypes.BIGINT,
-    allowNull: false,
-  },
-  address: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  location: {
-    type: DataTypes.JSONB,
-    allowNull: true,
-  },
-  active: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  },
-  firstname: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
-  },
-  lastname: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
-  },
-  phone: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
-  },
-  zipcode: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
-  },
-  street_house_number: {
-    type: DataTypes.STRING(255),
-    allowNull: true,
-  },
-  additional_details: {
-    type: DataTypes.STRING(191),
-    allowNull: true,
-  },
-  region_id: {
-    type: DataTypes.BIGINT,
-    allowNull: false,
-    defaultValue: 1,
-  },
-  country_id: {
-    type: DataTypes.BIGINT,
-    allowNull: true,
-    defaultValue: 1,
-  },
-  city_id: {
-    type: DataTypes.BIGINT,
-    allowNull: true,
-  },
-  area_id: {
-    type: DataTypes.BIGINT,
-    allowNull: true,
-  },
-  city: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  state: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  created_at: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  updated_at: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-}, {
-  sequelize,
-  modelName: 'UserAddress',
-  tableName: 'user_addresses',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-});
+module.exports = (sequelize) => {
+  const UserAddress = sequelize.define('UserAddress', {
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    user_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
+    },
+    address: {
+      type: DataTypes.TEXT('long'),
+      allowNull: true,
+    },
+    location: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: 0,
+    },
+    firstname: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    lastname: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    zipcode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    street_house_number: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    additional_details: {
+      type: DataTypes.STRING(191),
+      allowNull: true,
+    },
+    region_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
+      defaultValue: 1,
+    },
+    country_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+      defaultValue: 1,
+    },
+    city_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
+    area_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
+    city: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    state: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    address_type: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    username_or_note: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+  }, {
+    tableName: 'user_addresses',
+    timestamps: false,
+    underscored: true,
+  });
 
-// ✅ No associations/relationships at all
+  UserAddress.associate = (models) => {
+    UserAddress.belongsTo(models.User, {
+      foreignKey: 'user_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+    UserAddress.belongsTo(models.Region, {
+      foreignKey: 'region_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+    UserAddress.belongsTo(models.Country, {
+      foreignKey: 'country_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+    UserAddress.belongsTo(models.City, {
+      foreignKey: 'city_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+    UserAddress.belongsTo(models.Area, {
+      foreignKey: 'area_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
 
-module.exports = UserAddress;
+  return UserAddress;
+};
+

@@ -1,36 +1,32 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+const { DataTypes } = require('sequelize');
 
-class Blog extends Model {}
-
-Blog.init(
-  {
+module.exports = (sequelize) => {
+  const Blog = sequelize.define('Blog', {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
-      allowNull: false,
+      autoIncrement: true,
     },
     uuid: {
-      type: DataTypes.STRING(36),
+      type: DataTypes.CHAR(36),
       allowNull: false,
+      unique: true,
     },
     user_id: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
     },
     type: {
-      type: DataTypes.SMALLINT,
+      type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: 1,
     },
     published_at: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: true,
     },
     active: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
       defaultValue: true,
     },
     img: {
@@ -38,19 +34,20 @@ Blog.init(
       allowNull: true,
     },
     r_count: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
+      type: DataTypes.DOUBLE,
       defaultValue: 0,
     },
     r_avg: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
+      type: DataTypes.DOUBLE,
       defaultValue: 0,
     },
     r_sum: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
+      type: DataTypes.DOUBLE,
       defaultValue: 0,
+    },
+    category_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     created_at: {
       type: DataTypes.DATE,
@@ -60,31 +57,24 @@ Blog.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    category_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-  },
-  {
-    sequelize,
-    modelName: 'Blog',
+  }, {
     tableName: 'blogs',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  }
-);
+    underscored: true,
+    timestamps: false, // since we manually handle created_at and updated_at
+  });
 
-// ✅ Constants
-Blog.TYPES = {
-  blog: 1,
-  notification: 2,
+  Blog.associate = (models) => {
+    Blog.belongsTo(models.User, {
+      foreignKey: 'user_id',
+      as: 'user',
+    });
+
+    Blog.belongsTo(models.BlogCategory, {
+      foreignKey: 'category_id',
+      as: 'category',
+      onDelete: 'CASCADE',
+    });
+  };
+
+  return Blog;
 };
-
-// ✅ Associations
-Blog.associate = (models) => {
-  Blog.hasMany(models.BlogTranslation, { foreignKey: 'blog_id', as: 'translations' });
-  Blog.hasOne(models.BlogTranslation, { foreignKey: 'blog_id', as: 'translation' });
-};
-
-module.exports = Blog;

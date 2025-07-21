@@ -78,8 +78,8 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    underscored: true,
-    freezeTableName: true,
+    underscored: true,      // Added for consistency with other models
+    freezeTableName: true,  // Added for consistency with other models
   });
 
   // Define associations for Category
@@ -123,6 +123,10 @@ module.exports = (sequelize, DataTypes) => {
     //   foreignKey: 'category_id',
     //   as: 'products',
     // });
+  Category.associate = models => {
+    Category.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
+    Category.belongsTo(models.Category, { foreignKey: 'parent_id', as: 'parent' });
+    Category.hasMany(models.Category, { foreignKey: 'parent_id', as: 'children' });
   };
 
   return Category;

@@ -1,42 +1,37 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
-
-class Banner extends Model {}
-
-Banner.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const Banner = sequelize.define('Banner', {
     id: {
-      type: DataTypes.BIGINT,  // 🔄 Match BIGSERIAL
-      autoIncrement: true,
+      type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
+      autoIncrement: true,
       allowNull: false,
     },
     url: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(191),
       allowNull: true,
     },
     type: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
-      defaultValue: 'banner',  // ✅ Match DB default
+      defaultValue: 'banner',
     },
     img: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(191),
       allowNull: true,
     },
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true,  // ✅ Match DB default
+      defaultValue: true,
     },
     clickable: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true,  // ✅ Match DB default
+      defaultValue: true,
     },
     input: {
       type: DataTypes.INTEGER,
-      allowNull: true,  // ✅ No NOT NULL constraint in DB
+      allowNull: true,
     },
     created_at: {
       type: DataTypes.DATE,
@@ -47,39 +42,34 @@ Banner.init(
       allowNull: true,
     },
     shop_id: {
-      type: DataTypes.BIGINT,
-      allowNull: true,  // ✅ No NOT NULL constraint in DB
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'Banner',
+  }, {
     tableName: 'banners',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  }
-);
-
-// ✅ Constants
-Banner.BANNER = 'banner';
-Banner.LOOK = 'look';
-
-Banner.TYPES = [
-  Banner.BANNER,
-  Banner.LOOK,
-];
-
-// ✅ Associations
-Banner.associate = (models) => {
-  Banner.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
-  Banner.belongsToMany(models.Product, {
-    through: models.BannerProduct,
-    foreignKey: 'banner_id',
-    as: 'products',
+    timestamps: false, // Laravel uses timestamps but we manually define them
+    underscored: true,
+    indexes: [
+      { fields: ['type'] },
+      { fields: ['shop_id'] }
+    ]
   });
-  Banner.hasMany(models.BannerTranslation, { foreignKey: 'banner_id', as: 'translations' });
-  Banner.hasOne(models.BannerTranslation, { foreignKey: 'banner_id', as: 'translation' });
-};
 
-module.exports = Banner;
+  Banner.associate = (models) => {
+    Banner.hasMany(models.BannerTranslation, {
+      foreignKey: 'banner_id',
+      as: 'translations',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    Banner.belongsTo(models.Shop, {
+      foreignKey: 'shop_id',
+      as: 'shop',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return Banner;
+};

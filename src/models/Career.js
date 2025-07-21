@@ -1,57 +1,24 @@
-const { DataTypes, Model, Op } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+// models/Career.js
 
-class Career extends Model {
-  // Laravel-like scopeActive
-  static scopeActive(query) {
-    return query.where({ active: true });
-  }
-
-  // Laravel-like scopeFilter
-  static scopeFilter(query, filter) {
-    if (filter.category_id) {
-      query.where({ category_id: filter.category_id });
-    }
-    if (filter.active !== undefined) {
-      query.where({ active: filter.active });
-    }
-    if (filter.search) {
-      query.where({
-        '$translations.title$': {
-          [Op.iLike]: `%${filter.search}%`
-        }
-      });
-    }
-    return query;
-  }
-
-  static associate(models) {
-    this.hasMany(models.CareerTranslation, { foreignKey: 'career_id', as: 'translations' });
-    this.hasOne(models.CareerTranslation, { foreignKey: 'career_id', as: 'translation' });
-    this.belongsTo(models.Category, { foreignKey: 'category_id', as: 'category' });
-  }
-}
-
-Career.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const Career = sequelize.define('Career', {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.BIGINT,
       primaryKey: true,
-      allowNull: false,
+      autoIncrement: true,
     },
     category_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     location: {
-      type: DataTypes.JSONB,
-      allowNull: true, // ✅ corrected from false to true
+      type: DataTypes.JSONB, // PostgreSQL supports JSONB
+      allowNull: true,
     },
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true, // ✅ corrected from false to true
+      defaultValue: true,
     },
     created_at: {
       type: DataTypes.DATE,
@@ -61,15 +28,19 @@ Career.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'Career',
+  }, {
     tableName: 'careers',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  }
-);
+    underscored: true,
+    timestamps: false, // Disable if you're not using Sequelize's timestamps
+  });
 
-module.exports = Career;
+  Career.associate = (models) => {
+    Career.belongsTo(models.Category, {
+      foreignKey: 'category_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return Career;
+};

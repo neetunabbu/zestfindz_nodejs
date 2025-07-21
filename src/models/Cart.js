@@ -1,10 +1,7 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+// models/Cart.js
 
-class Cart extends Model {}
-
-Cart.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const Cart = sequelize.define('Cart', {
     id: {
       type: DataTypes.BIGINT,
       autoIncrement: true,
@@ -52,7 +49,7 @@ Cart.init(
       allowNull: false,
       defaultValue: 1,
     },
-    cart_group: {
+    group: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
@@ -66,19 +63,56 @@ Cart.init(
       allowNull: true,
     },
     wallet_applied_amount: {
-      type: DataTypes.REAL,
+      type: DataTypes.FLOAT,
       allowNull: true,
       defaultValue: 0,
     },
-  },
-  {
-    sequelize,
-    modelName: 'Cart',
+  }, {
     tableName: 'carts',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  }
-);
+    timestamps: false,
+    underscored: true,
+  });
 
-module.exports = Cart;
+  Cart.associate = (models) => {
+    Cart.belongsTo(models.User, {
+      foreignKey: 'owner_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    Cart.belongsTo(models.Currency, {
+      foreignKey: 'currency_id',
+      onDelete: 'SET NULL',
+    });
+
+    Cart.belongsTo(models.Region, {
+      foreignKey: 'region_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    Cart.belongsTo(models.Country, {
+      foreignKey: 'country_id',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    Cart.belongsTo(models.City, {
+      foreignKey: 'city_id',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    Cart.belongsTo(models.Area, {
+      foreignKey: 'area_id',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+
+    Cart.hasMany(models.UserCart, {
+      foreignKey: 'cart_id',
+    });
+  };
+
+  return Cart;
+};

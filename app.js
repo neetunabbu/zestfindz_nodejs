@@ -16,8 +16,11 @@ app.get('/', (req, res) => {
 const adminUserRoutes = require('./src/routes/api/v1/Dashboard/admin/user.routes');
 const adminRoleRoutes = require('./src/routes/api/v1/Dashboard/admin/role.routes');
 const authRoutes = require("./src/routes/auth");
+const bankDocRoutes = require("./src/routes/api/v1/Dashboard/seller/be-seller/bankDoc");
+const shopRoutes = require("./src/routes/api/v1/Dashboard/seller/be-seller/shop");
+const becomeSellerRoutes = require("./src/routes/api/v1/Dashboard/seller/be-seller/becomeSeller");
 
-// ✅ Mock Auth Middleware 
+
 const mockAuth = require('./src/middleware/mockAuth');
 
 
@@ -34,9 +37,12 @@ app.use('/api/admin', (req, res, next) => {
 
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin', adminRoleRoutes);
-app.use('/api/be-seller', adminRoleRoutes);
+app.use('/api/v1/be-seller', becomeSellerRoutes);
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1', bankDocRoutes);
+app.use('/api/v1', shopRoutes);
+
 
 
 

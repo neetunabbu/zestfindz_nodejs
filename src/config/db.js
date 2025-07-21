@@ -13,7 +13,7 @@ const sequelize = new Sequelize(process.env.DB_URL, {
   logging: false, // disable SQL logs
 });
  
-
+ 
 // ✅ Test Database Connection
 (async () => {
     try {
@@ -23,5 +23,7 @@ const sequelize = new Sequelize(process.env.DB_URL, {
         console.error('❌ Database Connection Failed:', error);
     }
 })();
-
+ 
 module.exports = sequelize;
+ 
+ 
