@@ -1,24 +1,27 @@
-// File: src/models/UserDigitalFile.js
+const { DataTypes } = require('sequelize');
 
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Adjust path to your DB config
-
-class UserDigitalFile extends Model {}
-
-UserDigitalFile.init(
-  {
+module.exports = (sequelize) => {
+  const UserDigitalFile = sequelize.define('UserDigitalFile', {
     id: {
       type: DataTypes.BIGINT.UNSIGNED,
-      autoIncrement: true,
       primaryKey: true,
+      autoIncrement: true,
     },
-    user_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
-      allowNull: false,
+    active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    downloaded: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     digital_file_id: {
       type: DataTypes.BIGINT.UNSIGNED,
-      allowNull: false,
+      allowNull: true,
+    },
+    user_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
     },
     created_at: {
       type: DataTypes.DATE,
@@ -28,14 +31,44 @@ UserDigitalFile.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'UserDigitalFile',
+  }, {
     tableName: 'user_digital_files',
-    timestamps: true,
     underscored: true,
-  }
-);
+    timestamps: false, // Laravel disables timestamps
+  });
 
-module.exports = UserDigitalFile;
+  UserDigitalFile.associate = (models) => {
+    UserDigitalFile.belongsTo(models.User, {
+      foreignKey: 'user_id',
+      as: 'user',
+    });
+
+    UserDigitalFile.belongsTo(models.DigitalFile, {
+      foreignKey: 'digital_file_id',
+      as: 'digitalFile',
+    });
+  };
+
+  // Custom scopes (equivalent to Laravel scopes)
+  UserDigitalFile.addScope('active', {
+    where: {
+      active: true,
+    },
+  });
+
+  UserDigitalFile.addScope('filter', (filter = {}) => {
+    const conditions = {};
+    if (filter.digital_file_id) {
+      conditions.digital_file_id = filter.digital_file_id;
+    }
+    if (filter.user_id) {
+      conditions.user_id = filter.user_id;
+    }
+    if (typeof filter.active !== 'undefined') {
+      conditions.active = filter.active;
+    }
+    return { where: conditions };
+  });
+
+  return UserDigitalFile;
+};

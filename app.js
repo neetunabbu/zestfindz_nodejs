@@ -61,6 +61,10 @@ app.use('/api/v1', adminApiRoutes);
 // Rest/User Routes
 const restApiRoutes = require('./src/routes/api/v1/Dashboard/rest/apiRoutes');
 app.use('/api/v1', restApiRoutes);
+// User Routes
+const userApiRoutes = require('./src/routes/api/v1/Dashboard/user/apiRoutes');
+app.use('/api/v1', userApiRoutes);
+
 // Test route
 app.get('/test', (req, res) => {
     console.log("testing");

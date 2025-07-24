@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Banner = sequelize.define('Banner', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false,

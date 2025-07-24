@@ -1,208 +1,141 @@
-// File: src/repositories/DigitalFileRepository/DigitalFileRepository.js
+const { DigitalFile, Product, Translation } = require('../../models');
 
-const { Op } = require('sequelize');
-const { DigitalFile } = require('../../models/DigitalFile');
-const { Language } = require('../../models/Language');
-const { UserDigitalFile } = require('../../models/UserDigitalFile.js');
-const { Product } = require('../../models/Product');
-const { Translation } = require('../../models/Translation');
-const { Stock } = require('../../models/Stock');
-const CoreRepository = require('../CoreRepository');
-const { getDefaultLocale } = require('../../helpers/localeHelper');
-
-class DigitalFileRepository extends CoreRepository {
+class DigitalFileRepository {
   constructor(language = 'en') {
-    super();
     this.language = language;
-    this.model = DigitalFile;
+  }
+
+  buildWhereClause(filter = {}) {
+    const where = {};
+
+    if (filter.active !== undefined) {
+      where.active = filter.active;
+    }
+
+    if (filter.product_id) {
+      where.product_id = filter.product_id;
+    }
+
+    return where;
   }
 
   async paginate(filter = {}) {
-    const locale = await getDefaultLocale();
+    const locale = this.language;
 
-    const include = [
-      {
-        model: Product,
-        where: filter.shop_id
-          ? { shop_id: filter.shop_id }
-          : undefined,
-        required: true,
-        include: [
-          {
-            model: Translation,
-            as: 'translation',
-            where: {
-              [Op.or]: [
-                { locale: this.language },
-                { locale: locale }
-              ]
-            },
-            required: false
-          }
-        ]
-      }
-    ];
-
-    const perPage = filter.perPage || 10;
-    const page = filter.page || 1;
+    const where = this.buildWhereClause(filter);
+    const limit = parseInt(filter.perPage, 10) || 10;
+    const page = parseInt(filter.page, 10) || 1;
+    const offset = (page - 1) * limit;
 
     return await DigitalFile.findAndCountAll({
-      where: {},
-      include,
-      limit: perPage,
-      offset: (page - 1) * perPage,
-      distinct: true
-    });
-  }
-
-  async show(modelId) {
-    const locale = await getDefaultLocale();
-
-    return await DigitalFile.findByPk(modelId, {
+      where,
       include: [
         {
           model: Product,
+          as: 'product',
+          where: filter.shop_id ? { shop_id: filter.shop_id } : undefined,
           include: [
             {
               model: Translation,
-              as: 'translation',
-              where: {
-                [Op.or]: [
-                  { locale: this.language },
-                  { locale: locale }
-                ]
-              },
-              required: false
-            }
-          ]
-        }
-      ]
+              as: 'translations',
+              where: { locale: this.language },
+              required: false,
+            },
+          ],
+          required: false,
+        },
+      ],
+
+      limit,
+      offset,
+      order: [['id', 'DESC']],
     });
   }
 
-  async myDigitalFile(filter = {}) {
-    const locale = await getDefaultLocale();
+  async myDigitalFiles(userId, filter = {}) {
+    const locale = this.language;
+    const where = { user_id: userId };
 
-    const include = [
-      {
-        model: DigitalFile,
-        include: [
-          {
-            model: Product,
-            where: filter.shop_id
-              ? { shop_id: filter.shop_id }
-              : undefined,
-            include: [
-              {
-                model: Translation,
-                as: 'translation',
-                where: {
-                  [Op.or]: [
-                    { locale: this.language },
-                    { locale: locale }
-                  ]
-                },
-                required: false
-              },
-              {
-                model: Stock,
-                where: { quantity: { [Op.gt]: 0 } },
-                include: [
-                  {
-                    association: 'stockExtras',
-                    include: [
-                      'value',
-                      {
-                        association: 'group',
-                        include: [
-                          {
-                            model: Translation,
-                            as: 'translation',
-                            where: {
-                              [Op.or]: [
-                                { locale: this.language },
-                                { locale: locale }
-                              ]
-                            },
-                            required: false
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    association: 'bonus',
-                    where: {
-                      expired_at: { [Op.gt]: new Date() }
-                    },
-                    attributes: [
-                      'id', 'expired_at', 'stock_id',
-                      'bonus_quantity', 'value', 'type', 'status'
-                    ],
-                    required: false
-                  },
-                  {
-                    association: 'discount',
-                    where: {
-                      start: { [Op.lte]: new Date() },
-                      end: { [Op.gte]: new Date() },
-                      active: true
-                    },
-                    required: false
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ];
+    if (filter.digital_file_id) {
+      where.digital_file_id = filter.digital_file_id;
+    }
 
-    const perPage = filter.perPage || 10;
-    const page = filter.page || 1;
+    if (filter.active !== undefined) {
+      where.active = filter.active;
+    }
+
+    const limit = parseInt(filter.perPage, 10) || 10;
+    const page = parseInt(filter.page, 10) || 1;
+    const offset = (page - 1) * limit;
+
+    const { UserDigitalFile } = require('../../models');
 
     return await UserDigitalFile.findAndCountAll({
-      where: {},
-      include,
-      limit: perPage,
-      offset: (page - 1) * perPage,
-      distinct: true
+      where,
+      include: [
+        {
+          model: DigitalFile,
+          as: 'digitalFile',
+          include: [
+            {
+              model: Product,
+              as: 'product',
+              where: filter.shop_id ? { shop_id: filter.shop_id } : undefined,
+              include: [
+                {
+                  model: Translation,
+                  as: 'translations',
+                  where: { locale: this.language },
+                  required: false,
+                },
+              ],
+              required: false,
+            },
+          ],
+
+        },
+      ],
+      limit,
+      offset,
+      order: [['id', 'DESC']],
     });
   }
 
   async getDigitalFile(id, userId) {
-    const locale = await getDefaultLocale();
+    const locale = this.language;
+    const { UserDigitalFile } = require('../../models');
 
     return await UserDigitalFile.findOne({
       where: {
         id,
-        user_id: userId
+        user_id: userId,
       },
       include: [
         {
           model: DigitalFile,
+          as: 'digitalFile',
           attributes: ['id', 'path', 'product_id', 'active'],
           include: [
             {
               model: Product,
+              as: 'product',
               attributes: ['id'],
               include: [
                 {
                   model: Translation,
-                  as: 'translation',
-                  where: {
-                    [Op.or]: [
-                      { locale: this.language },
-                      { locale: locale }
-                    ]
-                  },
-                  required: false
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                  as: 'translations',
+                  where: locale
+                    ? {
+                      locale,
+                    }
+                    : undefined,
+                  required: false,
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
   }
 }

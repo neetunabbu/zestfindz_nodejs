@@ -141,10 +141,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       defaultValue: 'N/A',
     },
-    seo_tags: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    }
+    // seo_tags: {
+    //   type: DataTypes.JSONB,
+    //   allowNull: true,
+    // }
   }, {
     tableName: 'products',
     timestamps: false,
@@ -186,6 +186,18 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE',
     });
+     Product.hasMany(models.Stock, {
+    foreignKey: 'product_id',
+    as: 'stocks',
+  });
+  Product.hasMany(models.Translation, {
+    foreignKey: 'translationable_id',
+    constraints: false,
+    scope: {
+      translationable_type: 'Product',
+    },
+    as: 'translations',
+  });
   };
 
   return Product;

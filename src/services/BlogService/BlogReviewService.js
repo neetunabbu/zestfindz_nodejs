@@ -1,37 +1,30 @@
 'use strict';
-const { Op } = require('sequelize');
-const { Blog } = require('../../models/Blog');
-const CoreService = require('../CoreService');
+
+const BlogService = require('./BlogService');
 const ResponseError = require('../../helpers/ResponseError');
 
-class BlogReviewService extends CoreService {
-  /**
-   * Get the model class
-   * @returns {typeof Blog}
-   */
+class BlogReviewService extends BlogService {
+  constructor(language = null, currency = null) {
+    super(language, currency);
+  }
   getModelClass() {
-    return Blog;
+    return this.model;  
   }
 
-  /**
-   * Add review to the blog
-   * @param {Blog} blog - Blog instance
-   * @param {Object} collection - Review data
-   * @returns {{ status: boolean, code: number, data: Blog }}
-   */
-  async addReview(blog, collection) {
-    if (typeof blog.addReview === 'function') {
-      await blog.addReview(collection);
-    } else {
-      throw new Error('addReview method not defined on Blog model');
-    }
+  async addReview(blog, reviewData) {
+    try {
+      if (typeof blog.createReview === 'function') {
+        await blog.createReview(reviewData);
+      } else {
+        throw new Error('createReview method not defined on Blog model instance. Please ensure associations are set correctly.');
+      }
+      return { status: true, code: ResponseError.NO_ERROR, data: blog };
 
-    return {
-      status: true,
-      code: ResponseError.NO_ERROR,
-      data: blog,
-    };
+    } catch (error) {
+      console.error('BlogReviewService.addReview error:', error);
+      return { status: false, code: ResponseError.ERROR_400, message: error.message };
+    }
   }
 }
 
-module.exports = new BlogReviewService();
+module.exports = BlogReviewService;

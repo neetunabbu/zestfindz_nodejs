@@ -18,6 +18,8 @@ yarn-error.log
 /storage/framework/
 !/upload/images
 /upload/images/*
+!/uploads/files
+/upload/files/*
 
 #branch exclude path
 .github/workflows/main.yml

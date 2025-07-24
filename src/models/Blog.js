@@ -64,17 +64,24 @@ module.exports = (sequelize) => {
   });
 
   Blog.associate = (models) => {
-    Blog.belongsTo(models.User, {
-      foreignKey: 'user_id',
-      as: 'user',
-    });
+  Blog.belongsTo(models.User, {
+    foreignKey: 'user_id',
+    as: 'user',
+  });
 
-    Blog.belongsTo(models.BlogCategory, {
-      foreignKey: 'category_id',
-      as: 'category',
-      onDelete: 'CASCADE',
-    });
-  };
+  Blog.belongsTo(models.BlogCategory, {
+    foreignKey: 'category_id',
+    as: 'category',
+    onDelete: 'CASCADE',
+  });
 
+  // Blog.hasMany(models.BlogReview, {
+  //   foreignKey: 'blog_id',
+  //   as: 'reviews',
+  //   onDelete: 'CASCADE',
+  // });
+  Blog.hasMany(models.BlogReview, { foreignKey: 'blog_id', as: 'reviews' });
+
+};
   return Blog;
 };

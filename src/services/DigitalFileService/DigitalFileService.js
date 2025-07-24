@@ -2,14 +2,10 @@
 const { Op } = require('sequelize');
 const CoreService = require('../CoreService');
 const ResponseError = require('../../helpers/ResponseError');
-const { DigitalFile } = require('../../models/DigitalFile');
-const { Settings } = require('../../models/Settings');
-const { UserDigitalFile } = require('../../models/UserDigitalFile');
-const { Product } = require('../../models/Product');
+const { DigitalFile, Settings, UserDigitalFile, Product } = require('../../models');
 const fs = require('fs');
 const path = require('path');
-const multer = require('multer');
-const { uploadFileToS3, deleteFileFromS3 } = require('../../utils/aws'); // hypothetical AWS helper
+const { uploadFileToS3 } = require('../../utils/uploadToS3Buffer');
 
 class DigitalFileService extends CoreService {
   getModelClass() {
@@ -26,21 +22,21 @@ class DigitalFileService extends CoreService {
         filePath = await uploadFileToS3(data.file, 'files');
       } else {
         const filename = `${Date.now()}-${data.file.originalname}`;
-        const localPath = path.join(__dirname, '../../storage/private/files/', filename);
+        const localPath = path.join(__dirname, '../../uploads/files/', filename);
         fs.writeFileSync(localPath, data.file.buffer);
-        filePath = `private/files/${filename}`;
+        filePath = `files/${filename}`;
       }
 
       data.path = filePath;
 
-      const model = await this.model().upsert({
-        product_id: data.product_id,
+      const model = await this.getModelClass().upsert({
+        product_id: data.product_id || 1,
         ...data,
       });
 
       return { status: true, code: ResponseError.NO_ERROR, data: model };
     } catch (e) {
-      this.error(e);
+      this.error?.(e);
       return { status: false, code: ResponseError.ERROR_501, message: e.message };
     }
   }
@@ -49,11 +45,11 @@ class DigitalFileService extends CoreService {
     try {
       if (data.file) {
         const filename = `${Date.now()}-${data.file.originalname}`;
-        const newPath = path.join(__dirname, '../../storage/private/files/', filename);
+        const newPath = path.join(__dirname, '../../uploads/files/', filename);
         fs.writeFileSync(newPath, data.file.buffer);
-        data.path = `private/files/${filename}`;
+        data.path = `files/${filename}`;
 
-        const oldPath = path.join(__dirname, '../../storage/', model.path);
+        const oldPath = path.join(__dirname, '../../uploads/', model.path);
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
 
@@ -74,7 +70,7 @@ class DigitalFileService extends CoreService {
       });
 
       for (const model of models) {
-        const fullPath = path.join(__dirname, '../../storage/', model.path);
+        const fullPath = path.join(__dirname, '../../uploads/', model.path);
         if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
         await model.destroy();
       }
@@ -82,6 +78,7 @@ class DigitalFileService extends CoreService {
       return { status: true, code: ResponseError.NO_ERROR };
     } catch (e) {
       this.error(e);
+      console.error(e);
       return { status: false, code: ResponseError.ERROR_503, message: e.message };
     }
   }

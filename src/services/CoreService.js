@@ -12,7 +12,9 @@ class CoreService {
     this.language = language || null;
     this.currency = currency || null;
   }
-
+  error(e) {
+    console.error(`[${this.constructor.name}]`, e.message || e);
+  }
   /**
    * Should be overridden by child class
    */
