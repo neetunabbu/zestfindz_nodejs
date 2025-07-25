@@ -1,8 +1,8 @@
-const { UserActivity, Product, User } = require('../models');
-const ResponseError = require('../constants/responseError');
+const { UserActivity, Product, User } = require('../../models');
+const ResponseError = require('../../helpers/ResponseError');
 const UAParser = require('ua-parser-js');
 const { v4: uuidv4 } = require('uuid');
-const logger = require('../logger');
+const logger = require('../../Traits/Loggable');
 
 class UserActivityService {
   async create(modelId, modelType, type, value, user = null) {

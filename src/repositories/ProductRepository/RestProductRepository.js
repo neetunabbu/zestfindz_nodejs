@@ -1,58 +1,190 @@
-// File: D:/zestfindz_nodejs/src/repositories/ProductRepository/RestProductRepository.js
-
-const CoreRepository = require('../CoreRepository');
-const Language = require('../../models/Language');
+const { Op, fn, col } = require('sequelize');
 const Product = require('../../models/Product');
-const ShopAdsPackage = require('../../models/ShopAdsPackage');
+const Language = require('../../models/Language');
 const OrderDetail = require('../../models/OrderDetail');
-const { getShopIdsFromFilter } = require('../../helpers/locationHelper');
-const Utility = require('../../helpers/utility');
+const ShopAdsPackage = require('../../models/ShopAdsPackage');
 const ProductResource = require('../../resources/ProductResource');
-const UserActivityJob = require('../../jobs/UserActivityJob');
-const DB = require('../../config/db');
+const Utility = require('../../helpers/utility');
+const { paginate } = require('../../utils/pagination');
+const { dispatchUserActivity } = require('../../Jobs/UserActivityJob');
+const { ByLocation } = require('../../Traits/ByLocation');
+const BaseRepository = require('../CoreRepository');
 
-class RestProductRepository extends CoreRepository {
-  constructor(language = null) {
-    super({ query: { lang: language || 'en' } });
-    this.language = language || this.language;
+class RestProductRepository extends BaseRepository {
+  constructor() {
+    super(Product);
+    this.language = null;
+  }
+
+  async getLanguage() {
+    if (!this.language) {
+      const defaultLang = await Language.findOne({ where: { default: true } });
+      this.language = defaultLang?.locale || 'en';
+    }
+    return this.language;
   }
 
   async with() {
-    const localeRecord = await Language.findOne({ where: { default: true } });
-    const locale = localeRecord?.locale;
-
-    return [
-      { association: 'translation', where: { locale: this.language || locale }, required: false },
-      'stocks',
-      'stocks.gallery',
-      'stocks.stockExtras.value',
-      { association: 'stocks.stockExtras.group.translation', where: { locale: this.language || locale }, required: false },
-      { association: 'stocks.bonus', where: { expired_at: { $gt: new Date() } }, attributes: ['id', 'expired_at', 'stock_id', 'bonus_quantity', 'value', 'type', 'status'] },
-      { association: 'stocks.discount', where: { start: { $lte: new Date() }, end: { $gte: new Date() }, active: true } }
-    ];
+    const locale = await this.getLanguage();
+    return {
+      include: [
+        {
+          association: 'translation',
+          where: {
+            locale: {
+              [Op.or]: [this.language, locale]
+            }
+          }
+        },
+        'stocks',
+        {
+          association: 'stocks.gallery',
+        },
+        {
+          association: 'stocks.stockExtras',
+          include: ['value', {
+            association: 'group.translation',
+            where: {
+              locale: {
+                [Op.or]: [this.language, locale]
+              }
+            }
+          }]
+        },
+        {
+          association: 'stocks.bonus',
+          where: {
+            expired_at: {
+              [Op.gt]: new Date()
+            }
+          }
+        },
+        {
+          association: 'stocks.discount',
+          where: {
+            start: { [Op.lte]: new Date() },
+            end: { [Op.gte]: new Date() },
+            active: true
+          }
+        }
+      ]
+    };
   }
 
-  async showWith() {
-    const localeRecord = await Language.findOne({ where: { default: true } });
-    const locale = localeRecord?.locale;
+  async productsPaginate(filter = {}) {
+    const withRelations = await this.with();
+    return paginate(Product.scope({ method: ['filter', filter] }).scope('actual', this.language), {
+      perPage: filter.perPage || 10,
+      include: withRelations.include
+    });
+  }
 
-    return [
-      { association: 'shop.translation', where: { locale: this.language || locale }, required: false },
-      'category',
-      { association: 'category.translation', where: { locale: this.language || locale }, required: false },
-      'brand',
-      { association: 'unit.translation', where: { locale: this.language || locale }, required: false },
-      { association: 'translation', where: { locale: this.language || locale }, required: false },
-      'galleries',
-      { association: 'properties.group.translation', where: { locale: this.language || locale }, required: false },
-      'properties.value',
-      'stocks',
-      'stocks.galleries',
-      'stocks.stockExtras.value',
-      { association: 'stocks.stockExtras.group.translation', where: { locale: this.language || locale }, required: false },
-      'stocks.wholeSalePrices'
-    ];
+  async productByUUID(uuid) {
+    const locale = await this.getLanguage();
+    return Product.findOne({
+      where: {
+        uuid,
+        active: true,
+        status: Product.PUBLISHED
+      },
+      include: await this.showWith(),
+      required: true
+    });
+  }
+
+  async alsoBought(productId, filter = {}) {
+    const stockIds = await Stock.findAll({
+      attributes: ['id'],
+      where: { product_id: productId },
+      raw: true
+    }).then(stocks => stocks.map(s => s.id));
+
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+
+    const boughtProductIds = await OrderDetail.findAll({
+      where: {
+        stock_id: stockIds,
+        created_at: {
+          [Op.gte]: lastMonth
+        }
+      },
+      include: [{ model: Stock, attributes: ['product_id'] }],
+      raw: true
+    }).then(results => [...new Set(results.map(r => r['stock.product_id']))]);
+
+    return paginate(Product.scope({ method: ['filter', filter] }).scope('actual', this.language), {
+      where: {
+        id: { [Op.in]: boughtProductIds, [Op.ne]: productId }
+      },
+      include: await this.with(),
+      perPage: filter.perPage || 10
+    });
+  }
+
+  async compare(filter = {}) {
+    const ids = filter.ids || [];
+    const locale = await this.getLanguage();
+
+    const products = await Product.scope('actual', this.language).findAll({
+      where: { id: ids },
+      include: [
+        {
+          association: 'properties.group.translation',
+          where: {
+            locale: { [Op.or]: [this.language, locale] }
+          }
+        },
+        'properties.value',
+        'stocks.gallery',
+        'stocks.stockExtras.value',
+        {
+          association: 'stocks.stockExtras.group.translation',
+          where: {
+            locale: { [Op.or]: [this.language, locale] }
+          }
+        },
+        {
+          association: 'stocks.discount',
+          where: {
+            start: { [Op.lte]: new Date() },
+            end: { [Op.gte]: new Date() },
+            active: true
+          }
+        },
+        {
+          association: 'stocks.bonus',
+          where: {
+            expired_at: { [Op.gt]: new Date() }
+          }
+        },
+        {
+          association: 'translation',
+          where: {
+            locale: { [Op.or]: [this.language, locale] }
+          }
+        },
+        {
+          association: 'category.translation',
+          where: {
+            locale: { [Op.or]: [this.language, locale] }
+          }
+        },
+        'brand'
+      ]
+    });
+
+    return Utility.groupBy(products.map(p => new ProductResource(p)), 'category_id');
+  }
+
+  async reviewsGroupByRating(productId) {
+    return Utility.reviewsGroupRating({
+      reviewable_type: 'Product',
+      reviewable_id: productId
+    });
   }
 }
+
+Object.assign(RestProductRepository.prototype, ByLocation);
 
 module.exports = RestProductRepository;

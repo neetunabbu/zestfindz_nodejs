@@ -1,187 +1,143 @@
-// File: D:/zestfindz_nodejs/src/repositories/AdsPackageRepository/AdsPackageRepository.js
-
-const { Op } = require('sequelize');
-
+const { Op, fn, col } = require('sequelize');
 const AdsPackage = require('../../models/AdsPackage');
-const Language = require('../../models/Language');
 const ShopAdsPackage = require('../../models/ShopAdsPackage');
-const ShopAdsProduct = require('../../models/ShopAdsProduct');
-const Product = require('../../models/Product');
-const ProductTranslation = require('../../models/ProductTranslation');
-const Gallery = require('../../models/Gallery');
-
+const Language = require('../../models/Language');
 const RestProductRepository = require('../ProductRepository/RestProductRepository');
-const { getShopIdsFromFilter } = require('../../helpers/locationHelper');
-const { paginate } = require('../../helpers/pagination');
-const ByLocation = require('../../traits/ByLocation');
+const BaseRepository = require('../CoreRepository');
+const { ByLocation } = require('../../Traits/ByLocation');
 
-const CoreRepository = require('../CoreRepository');
-
-class AdsPackageRepository extends CoreRepository {
-  constructor(language = null) {
-    super({ query: { lang: language || 'en' } });
-    this.language = language || this.language;
+class AdsPackageRepository extends BaseRepository {
+  constructor() {
+    super(AdsPackage);
+    this.language = null;
   }
 
-  async index(filter) {
-    const localeRecord = await Language.findOne({ where: { default: true } });
-    const locale = localeRecord?.locale;
-    const shopIds = await getShopIdsFromFilter(filter);
+  async getLanguage() {
+    if (!this.language) {
+      const lang = await Language.findOne({ where: { default: true } });
+      this.language = lang?.locale || 'en';
+    }
+    return this.language;
+  }
 
-    return paginate(AdsPackage, {
-      where: {},
+  async index(filter = {}) {
+    const locale = await this.getLanguage();
+    const shopIds = await this.getIds(filter);
+
+    return AdsPackage.scope({ method: ['filter', filter] }).findAndPaginate({
+      perPage: filter.perPage || 10,
       include: [
         {
           association: 'translation',
           where: {
-            [Op.or]: [
-              { locale: this.language || locale },
-              { locale }
-            ]
+            locale: { [Op.or]: [this.language, locale] }
           },
-          required: false,
+          required: false
         },
         { association: 'galleries' },
         {
           association: 'shopAdsPackages',
-          required: true,
           where: {
-            ...(shopIds.length && { shop_id: { [Op.in]: shopIds } }),
+            ...(shopIds?.length ? { shop_id: { [Op.in]: shopIds } } : {}),
             status: ShopAdsPackage.APPROVED,
             expired_at: { [Op.gt]: new Date() }
           }
         }
-      ],
-      limit: filter.perPage || 10
+      ]
     });
   }
 
-  async adsProducts(filter) {
-    const localeRecord = await Language.findOne({ where: { default: true } });
-    const locale = localeRecord?.locale;
-    const column = filter.column || 'id';
+  async adsProducts(filter = {}) {
+    const locale = await this.getLanguage();
+    const shopIds = await this.getIds(filter);
+    const isRest = filter.isRest || false;
 
-    const validColumns = await AdsPackage.describe();
-    if (!Object.keys(validColumns).includes(column)) {
-      filter.column = 'id';
-    }
-
-    const shopIds = await getShopIdsFromFilter(filter);
-    const isRest = /^\/api\/v1\/rest\//.test(filter.route || '');
-
-    return paginate(AdsPackage, {
-      where: {},
+    return AdsPackage.scope({ method: ['filter', filter] }).findAndPaginate({
+      perPage: filter.perPage || 10,
       include: [
         {
           association: 'translation',
           where: {
-            [Op.or]: [
-              { locale: this.language || locale },
-              { locale }
-            ]
+            locale: { [Op.or]: [this.language, locale] }
           },
-          required: false,
+          required: false
         },
         { association: 'galleries' },
         {
           association: 'shopAdsPackages',
           required: true,
           where: {
-            ...(shopIds.length && isRest && { shop_id: { [Op.in]: shopIds } }),
-            active: true,
+            ...(isRest && shopIds?.length ? { shop_id: { [Op.in]: shopIds } } : {}),
             status: ShopAdsPackage.APPROVED,
+            active: true,
             expired_at: { [Op.gt]: new Date() }
           },
           include: [
             {
-              association: 'shopAdsProducts',
-              include: [
-                {
-                  association: 'product',
-                  attributes: ['id', 'uuid', 'slug', 'img'],
-                  include: [
-                    {
-                      association: 'translation',
-                      where: {
-                        [Op.or]: [
-                          { locale: this.language },
-                          { locale }
-                        ]
-                      },
-                      attributes: ['id', 'product_id', 'locale', 'title'],
-                      required: false
-                    }
-                  ]
-                }
-              ]
+              association: 'shopAdsProducts.product',
+              attributes: ['id', 'uuid', 'slug', 'img']
+            },
+            {
+              association: 'shopAdsProducts.product.translation',
+              where: {
+                locale: { [Op.or]: [this.language, locale] }
+              },
+              attributes: ['id', 'product_id', 'locale', 'title'],
+              required: false
             }
           ]
         }
-      ],
-      limit: filter.perPage || 10
+      ]
     });
   }
 
-  async paginate(filter) {
-    const localeRecord = await Language.findOne({ where: { default: true } });
-    const locale = localeRecord?.locale;
+  async paginate(filter = {}) {
+    const locale = await this.getLanguage();
 
-    return paginate(AdsPackage, {
-      where: {},
+    return AdsPackage.scope({ method: ['filter', filter] }).findAndPaginate({
+      perPage: filter.perPage || 10,
       include: [
         {
           association: 'translation',
           where: {
-            [Op.or]: [
-              { locale: this.language || locale },
-              { locale }
-            ]
-          },
-          required: false,
-        },
-        { association: 'galleries' },
-      ],
-      limit: filter.perPage || 10
-    });
-  }
-
-  async show(model, req) {
-    const localeRecord = await Language.findOne({ where: { default: true } });
-    const locale = localeRecord?.locale;
-    const shopIds = await getShopIdsFromFilter(req.query);
-    const isRest = /^\/api\/v1\/rest\//.test(req.originalUrl);
-
-    return await model.reload({
-      include: [
-        {
-          association: 'translation',
-          where: {
-            [Op.or]: [
-              { locale: this.language || locale },
-              { locale }
-            ]
+            locale: { [Op.or]: [this.language, locale] }
           },
           required: false
         },
-        'translations',
-        'galleries',
+        { association: 'galleries' }
+      ]
+    });
+  }
+
+  async show(model, filter = {}) {
+    const locale = await this.getLanguage();
+    const shopIds = await this.getIds(filter);
+    const isRest = filter.isRest || false;
+    const productRepo = new RestProductRepository();
+
+    return model.reload({
+      include: [
+        {
+          association: 'translation',
+          where: {
+            locale: { [Op.or]: [this.language, locale] }
+          },
+          required: false
+        },
+        { association: 'translations' },
+        { association: 'galleries' },
         {
           association: 'shopAdsPackages',
           where: {
-            ...(shopIds.length && isRest && { shop_id: { [Op.in]: shopIds } }),
-            active: true,
+            ...(isRest && shopIds?.length ? { shop_id: { [Op.in]: shopIds } } : {}),
             status: ShopAdsPackage.APPROVED,
+            active: true,
             expired_at: { [Op.gt]: new Date() }
           },
           include: [
             {
-              association: 'shopAdsProducts',
-              include: [
-                {
-                  association: 'product',
-                  include: await (new RestProductRepository(this.language)).with()
-                }
-              ]
+              association: 'shopAdsProducts.product',
+              include: await productRepo.with()
             }
           ]
         }
@@ -190,4 +146,6 @@ class AdsPackageRepository extends CoreRepository {
   }
 }
 
-module.exports = new AdsPackageRepository();
+Object.assign(AdsPackageRepository.prototype, ByLocation);
+
+module.exports = AdsPackageRepository;

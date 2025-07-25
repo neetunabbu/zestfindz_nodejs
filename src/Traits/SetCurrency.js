@@ -1,11 +1,11 @@
-const LoggableMixin = require('./loggableMixin');
+const Loggable = require('./Loggable');
 
 // Mixin for currency handling
 const SetCurrency = (sequelize) => {
   return {
     // Get currency rate
     async currency(req) {
-      LoggableMixin.error(new Error('[SetCurrency] currency called'));
+      Loggable.error(new Error('[SetCurrency] currency called'));
 
       const CurrencyModel = sequelize.models.Currency;
 
@@ -25,10 +25,10 @@ const SetCurrency = (sequelize) => {
         // Ensure rate is a positive float
         rate = parseFloat(rate <= 0 ? 1 : rate);
 
-        LoggableMixin.error(new Error(`[SetCurrency] Currency rate retrieved: rate=${rate}`));
+        Loggable.error(new Error(`[SetCurrency] Currency rate retrieved: rate=${rate}`));
         return rate;
       } catch (error) {
-        LoggableMixin.error(new Error(`[SetCurrency] Error in currency: ${error.message}`));
+        Loggable.error(new Error(`[SetCurrency] Error in currency: ${error.message}`));
         throw error;
       }
     }
