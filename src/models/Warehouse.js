@@ -1,101 +1,65 @@
-// File: src/models/Warehouse.js
+'use strict';
 
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db');
-
-class Warehouse extends Model {
-  static associate(models) {
-    // One-to-One
-    Warehouse.hasOne(models.WarehouseTranslation, {
-      foreignKey: 'warehouse_id',
-      as: 'translation',
-    });
-
-    // One-to-Many
-    Warehouse.hasMany(models.WarehouseTranslation, {
-      foreignKey: 'warehouse_id',
-      as: 'translations',
-    });
-
-    Warehouse.hasMany(models.WarehouseWorkingDay, {
-      foreignKey: 'warehouse_id',
-      as: 'workingDays',
-    });
-
-    Warehouse.hasMany(models.WarehouseClosedDate, {
-      foreignKey: 'warehouse_id',
-      as: 'closedDates',
-    });
-  }
-
-  // Custom scopes
-  static addScopes() {
-    Warehouse.addScope('active', {
-      where: { active: true },
-    });
-
-    Warehouse.addScope('filter', (filter = {}) => {
-      const where = {};
-      if (filter.region_id) where.region_id = filter.region_id;
-      if (filter.country_id) where.country_id = filter.country_id;
-      if (filter.city_id) where.city_id = filter.city_id;
-      if (filter.area_id) where.area_id = filter.area_id;
-      if (filter.hasOwnProperty('active')) where.active = filter.active;
-
-      return { where };
-    });
-  }
-}
-
-Warehouse.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const Warehouse = sequelize.define('Warehouse', {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
     },
     active: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
+      allowNull: false,
     },
     region_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
     },
     country_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
+      type: DataTypes.BIGINT,
+      allowNull: false,
     },
     city_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
     area_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
     address: {
-      type: DataTypes.JSON,
-      allowNull: true,
+      type: DataTypes.JSONB,
+      allowNull: false,
     },
     location: {
-      type: DataTypes.JSON,
-      allowNull: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     img: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: 'Warehouse',
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+  }, {
     tableName: 'warehouses',
-    timestamps: true,
-  }
-);
+    underscored: true,
+    timestamps: false, // or true if you want Sequelize to handle createdAt/updatedAt
+  });
 
-// Load scopes
-Warehouse.addScopes();
+  Warehouse.associate = function(models) {
+    Warehouse.belongsTo(models.Region, { foreignKey: 'region_id' });
+    Warehouse.belongsTo(models.Country, { foreignKey: 'country_id' });
+    Warehouse.belongsTo(models.City, { foreignKey: 'city_id' });
+    Warehouse.belongsTo(models.Area, { foreignKey: 'area_id' });
+  };
 
-module.exports = Warehouse;
+  return Warehouse;
+};

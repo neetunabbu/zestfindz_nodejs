@@ -1,75 +1,56 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // Adjust to your DB config path
-const Warehouse = require('./Warehouse');
+'use strict';
 
-class WarehouseWorkingDay extends Model {
-  static associate() {
-    WarehouseWorkingDay.belongsTo(Warehouse, {
-      foreignKey: 'warehouse_id',
-      as: 'warehouse',
-    });
-  }
-
-  static get DAYS() {
-    return {
-      monday: 'monday',
-      tuesday: 'tuesday',
-      wednesday: 'wednesday',
-      thursday: 'thursday',
-      friday: 'friday',
-      saturday: 'saturday',
-      sunday: 'sunday',
-    };
-  }
-
-  static filter(queryParams = {}) {
-    const { warehouse_id, day, from, to, disabled } = queryParams;
-    const where = {};
-
-    if (warehouse_id) where.warehouse_id = warehouse_id;
-    if (day) where.day = day;
-    if (from) where.from = { [sequelize.Op.gte]: from };
-    if (to) where.to = { [sequelize.Op.lte]: to };
-    if (disabled !== undefined) where.disabled = disabled;
-
-    return this.findAll({ where });
-  }
-}
-
-WarehouseWorkingDay.init(
-  {
+module.exports = (sequelize, DataTypes) => {
+  const WarehouseWorkingDay = sequelize.define('WarehouseWorkingDay', {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.BIGINT,
       primaryKey: true,
+      autoIncrement: true,
     },
     warehouse_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     day: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'),
       allowNull: false,
     },
     from: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      type: DataTypes.STRING(5),
+      allowNull: false,
+      defaultValue: '9:00',
     },
     to: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      type: DataTypes.STRING(5),
+      allowNull: false,
+      defaultValue: '21:00',
     },
     disabled: {
       type: DataTypes.BOOLEAN,
+      allowNull: false,
       defaultValue: false,
     },
-  },
-  {
-    sequelize,
-    modelName: 'WarehouseWorkingDay',
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+  }, {
     tableName: 'warehouse_working_days',
-    timestamps: true,
-  }
-);
+    underscored: true,
+    timestamps: false, // Set to true if you want Sequelize to manage createdAt/updatedAt
+  });
 
-module.exports = WarehouseWorkingDay;
+  WarehouseWorkingDay.associate = function(models) {
+    WarehouseWorkingDay.belongsTo(models.Warehouse, {
+      foreignKey: 'warehouse_id',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
+
+  return WarehouseWorkingDay;
+};
