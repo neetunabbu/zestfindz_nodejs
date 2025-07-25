@@ -1,4 +1,4 @@
-const Utility = require("../utils/utility");
+const Utility = require("../utils/Utility");
 const {
   Order,
   Shop,
