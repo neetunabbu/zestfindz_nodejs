@@ -82,10 +82,47 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,  // Added for consistency with other models
   });
 
-  Category.associate = models => {
-    Category.belongsTo(models.Shop, { foreignKey: 'shop_id', as: 'shop' });
-    Category.belongsTo(models.Category, { foreignKey: 'parent_id', as: 'parent' });
-    Category.hasMany(models.Category, { foreignKey: 'parent_id', as: 'children' });
+  // Define associations for Category
+  Category.associate = (models) => {
+    // Category has many translations
+    Category.hasMany(models.CategoryTranslation, {
+      foreignKey: 'category_id',
+      as: 'translations',
+    })
+
+    // Category has many meta tags (polymorphic association)
+    Category.hasMany(models.CategoryMetaTag, {
+      foreignKey: 'translatable_id',
+      constraints: false, // Important for polymorphic associations
+      scope: {
+        translatable_type: 'Category',
+      },
+      as: 'metaTags',
+    });
+
+    // Category can belong to a Shop
+    Category.belongsTo(models.Shop, {
+      foreignKey: 'shop_id',
+      as: 'shop',
+    });
+
+    // Self-referencing association for parent/child categories
+    Category.belongsTo(models.Category, {
+      foreignKey: 'parent_id',
+      as: 'parent',
+      // Optional: Add onDelete/onUpdate if you want cascading behavior
+      // onDelete: 'CASCADE',
+    });
+    Category.hasMany(models.Category, {
+      foreignKey: 'parent_id',
+      as: 'children',
+    });
+
+    // If products belong to categories:
+    // Category.hasMany(models.Product, {
+    //   foreignKey: 'category_id',
+    //   as: 'products',
+    // });
   };
 
   return Category;

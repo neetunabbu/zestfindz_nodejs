@@ -7,9 +7,7 @@ const CategoryController = (sequelize) => {
   const { v4: uuidv4 } = require('uuid');
   const ApiResponse = require('../../../../../Traits/ApiResponse');
   const Loggable = require('../../../../../Traits/Loggable');
-
   const types = ['main', 'sub_main', 'child', 'receipt'];
-
   const transformCategory = (category) => ({
     id: category.id,
     uuid: category.uuid,
@@ -71,7 +69,7 @@ const CategoryController = (sequelize) => {
     async store(req, res) {
       try {
         const { title, locale = 'en', type = 'main', meta_tags = [], keywords, input, slug, return_window_time, gst } = req.body;
-
+        const img = req.file ? req.file.filename : null;
         const shop = await getShop.shop(req);
         if (!shop) {
           return ApiResponse.errorResponse(res, 'ERR404', 'Shop not found', 404);
@@ -84,6 +82,7 @@ const CategoryController = (sequelize) => {
           type,
           active: true,
           keywords,
+          img, 
           input,
           slug,
           return_window_time,
@@ -129,18 +128,20 @@ const CategoryController = (sequelize) => {
       try {
         const { uuid } = req.params;
         const {
-  title,
-  locale = 'en',
-  type = 'main',
-  meta_tags = [],
-  keywords,
-  input,
-  slug,
-  return_window_time,
-  gst
-} = req.body;
+          title,
+          locale = 'en',
+          type = 'main',
+          meta_tags = [],
+          keywords,
+          input,
+          slug,
+          return_window_time,
+          gst
+        } = req.body;
 
-
+        if (req.file) {
+          category.img = req.file.filename;
+        }
         // Step 1: Find the category by UUID
         const category = await Category.findOne({ where: { uuid } });
         if (!category) {

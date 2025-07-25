@@ -1,4 +1,4 @@
-// models/digital_file.js
+// models/DigitalFile.js
 
 const { DataTypes } = require('sequelize');
 

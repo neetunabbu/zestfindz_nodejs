@@ -3,9 +3,11 @@ const express = require('express');
 const app = express();
 require('dotenv').config(); 
 const cors = require('cors');
+const path = require('path');
 
 app.use(express.json());
 app.use(cors());
+app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
 
 app.get('/', (req, res) => {
     res.send('✅ Welcome to Zestfindz API');
@@ -50,9 +52,20 @@ app.use('/api/v1/auth', userLoginRoutes);
 const restRoutes = require('./src/routes/api/v1/rest.routes');
 app.use('/api/v1/rest', restRoutes);
 
-const apiRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
-app.use('/api/v1/seller', apiRoutes);
+// seller Routes
+const sellerApiRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
+app.use('/api/v1', sellerApiRoutes);
+// Admin Routes
+const adminApiRoutes = require('./src/routes/api/v1/Dashboard/admin/apiRoutes');
+app.use('/api/v1', adminApiRoutes);
+// Rest/User Routes
+const restApiRoutes = require('./src/routes/api/v1/Dashboard/rest/apiRoutes');
+app.use('/api/v1', restApiRoutes);
+// User Routes
+const userApiRoutes = require('./src/routes/api/v1/Dashboard/user/apiRoutes');
+app.use('/api/v1', userApiRoutes);
 
+// Test route
 app.get('/test', (req, res) => {
     console.log("testing");
     res.json({ message: '✅ Test route is working!' });

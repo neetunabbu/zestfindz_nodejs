@@ -1,38 +1,22 @@
 module.exports = (sequelize, DataTypes) => {
   const Brand = sequelize.define('Brand', {
     id: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
     },
     uuid: {
-      type: DataTypes.CHAR(36),
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       allowNull: false,
+      unique: true,
     },
-    title: {
-      type: DataTypes.STRING(255),
+    name: {
+      type: DataTypes.STRING,
       allowNull: false,
-    },
-    active: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-    },
-    img: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
     },
     shop_id: {
-      type: DataTypes.BIGINT,
-      allowNull: true,
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    updated_at: {
-      type: DataTypes.DATE,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
   }, {

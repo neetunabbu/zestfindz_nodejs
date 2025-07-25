@@ -1,47 +1,44 @@
-// src/models/Translation.js
+// models/Translation.js
 module.exports = (sequelize, DataTypes) => {
-  const Translation = sequelize.define('Translation', {
-    id: {
+  const Translation = sequelize.define(
+    'Translation',
+    {
+      id: {
         type: DataTypes.BIGINT,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
-    },
-    status: {
-        type: DataTypes.INTEGER,
+      },
+      locale: {
+        type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 1,
-    },
-    locale: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-    },
-    group: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-    },
-    key: {
-        type: DataTypes.STRING(255),
+      },
+      key: {
+        type: DataTypes.STRING,
         allowNull: false,
     },
     value: {
         type: DataTypes.TEXT,
         allowNull: true,
-    },
-    created_at: {
-        type: DataTypes.DATE,
+      },
+      product_id: {
+        type: DataTypes.BIGINT,
         allowNull: true,
+      },
     },
-    updated_at: {
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
-      
-  }, {
-    tableName: 'translations',
-    timestamps: true,
-    underscored: true
-  });
+    {
+      tableName: 'translations',
+      timestamps: true,
+      underscored: true,
+    }
+  );
+
+  Translation.associate = (models) => {
+    Translation.belongsTo(models.Product, {
+      foreignKey: 'product_id',
+      as: 'product',
+    });
+  };
 
   return Translation;
 };
