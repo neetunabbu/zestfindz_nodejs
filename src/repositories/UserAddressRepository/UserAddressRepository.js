@@ -1,56 +1,57 @@
 const { Op } = require('sequelize');
 const { UserAddress } = require('../../models/UserAddress');
-const { User } = require('../../models/User');
+const {  User } = require('../../models/User');
 const CoreRepository = require('../CoreRepository');
 const axios = require('axios');
-const { getWith } = require('../../helpers/byLocationHelper'); // Assumes a helper equivalent for ByLocation
-const logger = require('../../config/logger'); // Assumes custom logger setup
 
-class UserAddressRepository {
-  
-  async paginate(filter = {}) {
-    const page = parseInt(filter.page) || 1;
-    const perPage = parseInt(filter.perPage) || 10;
-    const offset = (page - 1) * perPage;
-    const orderBy = filter.column || 'id';
-    const sort = filter.sort || 'DESC';
-
-    const where = {}; // Extend this with filtering logic if needed
-
-    const include = [
-      {
-        model: User,
-        attributes: ['id', 'firstname', 'lastname', 'img']
-      },
-      ...getWith()
-    ];
-
-    const { count, rows } = await UserAddress.findAndCountAll({
-      where,
-      include,
-      limit: perPage,
-      offset,
-      order: [[orderBy, sort]]
-    });
-
-    return {
-      total: count,
-      perPage,
-      currentPage: page,
-      lastPage: Math.ceil(count / perPage),
-      data: rows
-    };
+class UserAddressRepository extends CoreRepository {
+  constructor(req) {
+    super(req);
   }
 
-  async show(userAddressId) {
-    return await UserAddress.findByPk(userAddressId, {
+  getModelClass() {
+    return UserAddress;
+  }
+
+  async paginate(filter) {
+    const page = parseInt(filter.page) || 1;
+    const perPage = parseInt(filter.perPage) || 10;
+    const sortColumn = filter.column || 'id';
+    const sortDirection = filter.sort || 'DESC';
+
+    const where = {}; // You can add dynamic filters here if needed
+
+    const result = await UserAddress.findAndCountAll({
+      where,
       include: [
         {
           model: User,
-          attributes: ['id', 'firstname', 'lastname', 'img']
+          attributes: ['id', 'firstname', 'lastname', 'img'],
         },
-        ...getWith()
-      ]
+        ...(this.getWith?.() || [])
+      ],
+      order: [[sortColumn, sortDirection]],
+      offset: (page - 1) * perPage,
+      limit: perPage,
+    });
+
+    return {
+      rows: result.rows,
+      count: result.count,
+      currentPage: page,
+      perPage,
+    };
+  }
+
+  async show(model) {
+    return await model.reload({
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'firstname', 'lastname', 'img'],
+        },
+        ...(this.getWith?.() || [])
+      ],
     });
   }
 
@@ -59,37 +60,31 @@ class UserAddressRepository {
 
     if (!address) return null;
 
-    try {
-      const response = await axios.get('https://staging-express.delhivery.com/c/api/pin-codes/json/', {
-        params: {
-          token: '91b6796b405cff3518be0752768e81fca4d1984a',
-          filter_codes: address.zipcode
-        }
-      });
+    const response = await axios.get('https://staging-express.delhivery.com/c/api/pin-codes/json/', {
+      params: {
+        token: '91b6796b405cff3518be0752768e81fca4d1984a',
+        filter_codes: address.zipcode,
+      },
+    });
 
-      logger.debug('Delhivery API response', { body: response.data });
+    const isServiceable = response.status === 200 &&
+      Array.isArray(response.data.delivery_codes) &&
+      response.data.delivery_codes.length > 0;
 
-      const isServiceable = response.status === 200 && Array.isArray(response.data.delivery_codes) && response.data.delivery_codes.length > 0;
-
-      await address.update({ active: isServiceable ? 1 : 0 });
-
-    } catch (error) {
-      logger.error('Delhivery API error', { message: error.message });
-      await address.update({ active: 0 });
-    }
+    await address.update({ active: isServiceable ? 1 : 0 });
 
     return address;
   }
 
-  // Optional: if you want to use this fallback version
+  // Optional fallback version
   // async getActive(userId) {
   //   return await UserAddress.findOne({
   //     where: {
-  //       active: 1,
-  //       user_id: userId
+  //       user_id: userId,
+  //       active: true
   //     }
   //   });
   // }
 }
 
-module.exports = new UserAddressRepository();
+module.exports = UserAddressRepository;

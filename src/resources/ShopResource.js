@@ -1,16 +1,16 @@
-const translationResource = require('./translationResource');
-const shopTagResource = require('./shopTagResource');
+const translationResource = require('./TranslationResource');
+const shopTagResource = require('./ShopTagResource');
 const userResource = require('./userResource');
-const galleryResource = require('./galleryResource');
-const shopSubscriptionResource = require('./shopSubscriptionResource');
-const categoryResource = require('./categoryResource');
+const galleryResource = require('./GalleryResource');
+const shopSubscriptionResource = require('./ShopSubscriptionResource');
+const categoryResource = require('./CategoryResource');
 const bonusResource = require('./Bonus/BonusResource');
 const simpleDiscountResource = require('./simpleDiscountResource');
-const shopPaymentResource = require('./shopPaymentResource');
-const shopSocialResource = require('./shopSocialResource');
-const shopWorkingDayResource = require('./shopWorkingDayResource');
-const shopClosedDateResource = require('./shopClosedDateResource');
-const shopLocationResource = require('./shopLocationResource');
+const shopPaymentResource = require('./ShopPaymentResource');
+const shopSocialResource = require('./ShopSocialResource');
+const shopWorkingDayResource = require('./ShopWorkingDayResource');
+const shopClosedDateResource = require('./ShopClosedDateResource');
+const shopLocationResource = require('./ShopLocationResource');
  
 const ShopResource = (shopInstance, authUser = null, recommendedIds = []) => {
   if (!shopInstance) return null;
