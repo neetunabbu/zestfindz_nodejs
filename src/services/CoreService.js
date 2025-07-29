@@ -2,8 +2,8 @@
 
 const { Currency, Language } = require('../models');
 const ResponseError = require('../helpers/ResponseError');
-const ApiResponse = require('../traits/ApiResponse');
-const Loggable = require('../traits/loggable');
+const ApiResponse = require('../Traits/ApiResponse');
+const Loggable = require('../Traits/loggable');
 const cache = require('../utils/cache'); // Assume cache utility (e.g., NodeCache or Redis)
 
 class CoreService {
