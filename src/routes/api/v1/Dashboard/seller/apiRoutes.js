@@ -5,7 +5,7 @@ const sequelize = require('../../../../../config/db');
 const upload = require('../../../../../helpers/ImageUpload');
 
 const FilterParamsRequest = require('../../../../../requests/FilterParamsRequest');
-const adsPackageController = require('../../../../../controllers/Api/v1/dashboard/seller/AdsPackageController');
+// const adsPackageController = require('../../../../../controllers/Api/v1/dashboard/seller/AdsPackageController');
 
 // Import BrandController and initialize with sequelize
 const BrandController = require('../../../../../controllers/Api/v1/dashboard/seller/brandController');
@@ -37,7 +37,7 @@ router.post('/seller/brands/import', authMiddleware, upload.single('file'), bran
 router.get('/seller/brands/export', authMiddleware, brandController.fileExport);
 
 
-router.get('/seller/ads-packages', FilterParamsRequest, adsPackageController.index);
+// router.get('/seller/ads-packages', FilterParamsRequest, adsPackageController.index);
 // router.get('/:id', findAdsPackageById('AdsPackage'), adsPackageController.show);
 
 
