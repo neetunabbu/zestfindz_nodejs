@@ -1,6 +1,6 @@
 const { UserAddress } = require('../../../../../models');
 const axios = require('axios');
-const { successResponse, errorResponse } = require('../../../../../traits/ApiResponse');
+const { successResponse, errorResponse } = require('../../../../../Traits/ApiResponse');
 
 const UserAddressController = {
   async index(req, res) {
