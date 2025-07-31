@@ -1,11 +1,11 @@
 // resources/DeliveryPriceResource.js
 
-const TranslationResource = require('./TranslationResource');
-const RegionResource = require('./RegionResource');
-const CountryResource = require('./CountryResource');
-const CityResource = require('./CityResource');
-const AreaResource = require('./AreaResource');
-const ShopResource = require('./ShopResource');
+const TranslationResource = require('../resources/TranslationResource');
+const RegionResource = require('../resources/regionResource');
+const CountryResource = require('../resources/countryResource');
+const CityResource = require('../resources/cityResource');
+const AreaResource = require('../resources/areaResource');
+const ShopResource = require('../resources/ShopResource');
 
 const DeliveryPriceResource = (data) => {
   if (!data) return null;

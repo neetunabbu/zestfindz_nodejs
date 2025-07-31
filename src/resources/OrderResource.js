@@ -2,7 +2,7 @@
 const moment = require('moment');
 
 // Import all related resources
-const UserResource = require('./UserResource');
+const UserResource = require('./userResource');
 const ShopResource = require('./ShopResource');
 const CurrencyResource = require('./CurrencyResource');
 const OrderDetailResource = require('./OrderDetailResource');

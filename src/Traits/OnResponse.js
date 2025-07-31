@@ -1,5 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
-const ApiResponse = require('./apiResponse');
+const ApiResponse = require('./ApiResponse');
 
 // Constants for error codes (replace with your actual error codes)
 const RESPONSE_ERRORS = {

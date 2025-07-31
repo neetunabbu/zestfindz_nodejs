@@ -1,17 +1,32 @@
-// TranslationResource.js
+// Import all translation models
+const { BannerTranslation } = require("../models/BannerTranslation");
+const { BlogTranslation } = require("../models/BlogTranslation");
+const { FaqTranslation } = require("../models/FaqTranslation");
+const { CategoryTranslation } = require("../models/CategoryTranslation");
+const { PageTranslation } = require("../models/PageTranslation");
+// const { QuestionTranslation } = require("../Models/QuestionTranslation");
 
-function TranslationResource(data) {
+/**
+ * Resource transformer for translation objects.
+ * Mimics Laravel's JsonResource-style transformation.
+ *
+ * @param {Object} translation - The translation model instance.
+ * @returns {Object|null} - Transformed object or null if input is invalid.
+ */
+function TranslationResource(translation) {
+    if (!translation) return null;
+
     return {
-        id: parseInt(data.id, 10),
-        locale: String(data.locale),
-        ...(data.title && { title: String(data.title) }),
-        ...(data.short_desc && { short_desc: String(data.short_desc) }),
-        ...(data.description && { description: String(data.description) }),
-        ...(data.button_text && { button_text: String(data.button_text) }),
-        ...(data.address && { address: String(data.address) }),
-        ...(data.question && { question: String(data.question) }),
-        ...(data.answer && { answer: String(data.answer) }),
-        ...(data.faq && { faq: String(data.faq) }),
+        id: Number(translation.id),
+        locale: String(translation.locale),
+        title: translation.title ?? undefined,
+        short_desc: translation.short_desc ?? undefined,
+        description: translation.description ?? undefined,
+        button_text: translation.button_text ?? undefined,
+        address: translation.address ?? undefined,
+        question: translation.question ?? undefined,
+        answer: translation.answer ?? undefined,
+        faq: translation.faq ?? undefined
     };
 }
 

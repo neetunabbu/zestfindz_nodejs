@@ -1,4 +1,3 @@
-
 const express = require('express');
 const app = express();
 require('dotenv').config(); 
@@ -20,9 +19,7 @@ const bankDocRoutes = require("./src/routes/api/v1/Dashboard/seller/be-seller/ba
 const shopRoutes = require("./src/routes/api/v1/Dashboard/seller/be-seller/shop");
 const becomeSellerRoutes = require("./src/routes/api/v1/Dashboard/seller/be-seller/becomeSeller");
 
-
 const mockAuth = require('./src/middleware/mockAuth');
-
 
 app.use('/api/admin', (req, res, next) => {
     try {
@@ -43,14 +40,15 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1', bankDocRoutes);
 app.use('/api/v1', shopRoutes);
 
-
-
-
 const userLoginRoutes = require('./src/routes/api/v1/userLogin.routes');
 app.use('/api/v1/auth', userLoginRoutes);
 
 const restRoutes = require('./src/routes/api/v1/rest.routes');
 app.use('/api/v1/rest', restRoutes);
+
+// ✅ ADDED: seller base routes for setupSellerContext test
+const sellerBaseRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
+app.use('/api/v1/seller-base', sellerBaseRoutes);
 
 // seller Routes
 const sellerApiRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
@@ -76,4 +74,3 @@ app.use((req, res) => {
 });
 
 module.exports = app;
-

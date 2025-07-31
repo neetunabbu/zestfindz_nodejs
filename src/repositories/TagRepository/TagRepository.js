@@ -5,8 +5,8 @@ const { Tag } = require('../../models/Tag');
 const { TagTranslation } = require('../../models/TagTranslation');
 const { Product } = require('../../models/Product');
 const { Language } = require('../../models/Language');
-const { CoreRepository } = require('../CoreRepository');
-const { getCache } = require('../../helpers/cacheHelper'); // Your custom cache utility
+const CoreRepository  = require('../CoreRepository');
+const { getCache } = require('../../utils/cache'); // Your custom cache utility
 
 class TagRepository extends CoreRepository {
   getModelClass() {

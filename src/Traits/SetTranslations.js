@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize');
 const slugify = require('slugify');
-const LoggableMixin = require('./loggableMixin');
+const loggable= require('./loggableMixin');
 
 // Utility function to mimic Laravel's data_get
 const dataGet = (obj, key, defaultValue = null) => {

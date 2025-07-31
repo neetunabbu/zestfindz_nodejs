@@ -2,7 +2,7 @@
 
 const translationResource = require('./TranslationResource');
 const propertyValueResource = require('./PropertyValueResource');
-const shopResource = require('./ShopResource');
+const shopResource = require('../resources/ShopResource');
 
 function propertyGroupResource(propertyGroupInstance) {
   if (!propertyGroupInstance) return null;

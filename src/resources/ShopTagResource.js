@@ -1,5 +1,5 @@
-const galleryResource = require('./galleryResource');
-const translationResource = require('./translationResource');
+const galleryResource = require('./GalleryResource');
+const translationResource = require('./TranslationResource');
 
 const formatDate = (date) =>
   date ? new Date(date).toISOString().replace('T', ' ').substring(0, 19) + 'Z' : null;
