@@ -73,44 +73,60 @@ class UserActivityService {
     }
   }
 
-  async createMany(ids = []) {
-    try {
-      const userId = req.user?.id || null;
-      
-      const products = await Product.find({ _id: { $in: ids } });
-      
-      const activities = products.map(product => ({
-        model_id: product.id,
-        model_type: 'Product',
-        type: 'click',
-        value: 1,
-        user_id: userId,
-        ip: req.ip,
-        device: new UAParser(req.headers['user-agent']).getDevice().type || 'desktop',
-        agent: {
-          browser: new UAParser(req.headers['user-agent']).getBrowser().name,
-          platform: new UAParser(req.headers['user-agent']).getOS().name
-        },
-        createdAt: new Date()
-      }));
+async createMany(req) {
+  try {
+    const userId = req.user?.id || 1;
 
-      // Using bulk insert for better performance
-      await UserActivity.insertMany(activities);
+    const {
+      ids = [],
+      model_type = 'Product',
+      type = 1,
+      value = 1
+    } = req.body;
 
-      return {
-        status: true,
-        code: ResponseError.NO_ERROR,
-        message: 'Success'
-      };
-    } catch (error) {
-      logger.error('Bulk user activities creation error:', error);
+    if (!Array.isArray(ids) || ids.length === 0) {
       return {
         status: false,
-        code: ResponseError.ERROR_501,
-        message: error.message
+        message: 'No IDs provided to create user activities',
       };
     }
+
+    const parser = new UAParser(req.headers['user-agent'] || '');
+    const ip = req.ip || '127.0.0.1';
+
+    const activities = ids.map(id => ({
+      user_id: userId,
+      model_type,
+      model_id: id,
+      type,
+      value,
+      ip,
+      device: parser.getDevice().type || 'desktop',
+      agent: {
+        browser: parser.getBrowser().name,
+        platform: parser.getOS().name,
+      },
+      created_at: new Date()
+    }));
+
+    const created = await UserActivity.bulkCreate(activities, { returning: true });
+
+    return {
+      status: true,
+      code: ResponseError.NO_ERROR,
+      message: 'User activities created successfully',
+      data: created,
+    };
+  } catch (error) {
+    console.error('createMany error:', error);
+    return {
+      status: false,
+      code: ResponseError.ERROR_500,
+      message: error.message,
+    };
   }
+}
+
 }
 
 module.exports = new UserActivityService();

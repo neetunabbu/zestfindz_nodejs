@@ -1,23 +1,72 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // Update path as per your config
-const User = require('./User');
-const Product = require('./Product');
-const Shop = require('./Shop');
+const { DataTypes, Op } = require('sequelize');
 
-class UserActivity extends Model {
-  static associate(models) {
-    UserActivity.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+module.exports = (sequelize) => {
+  const UserActivity = sequelize.define('UserActivity', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    model_type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    model_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    type: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    value: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    ip: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    device: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    agent: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+  }, {
+    tableName: 'user_activities',
+    underscored: true,
+    timestamps: false,
+  });
 
-    // Polymorphic relation — implement as a workaround
-    // Define polymorphic manually in service/repository if needed
-  }
-
-  static TYPES = {
+  // Enum equivalent
+  UserActivity.TYPES = {
     product: 'Product',
-    shop: 'Shop'
+    shop: 'Shop',
   };
 
-  static filter(query, filters = {}) {
+  // Associations
+  UserActivity.associate = (models) => {
+    UserActivity.belongsTo(models.User, {
+      foreignKey: 'user_id',
+      as: 'user',
+    });
+
+    // You can add polymorphic handling manually in services if needed
+  };
+
+  // Scopes
+  UserActivity.addScope('filter', (filters = {}) => {
     const where = {};
 
     if (filters.model_type && UserActivity.TYPES[filters.model_type]) {
@@ -31,61 +80,15 @@ class UserActivity extends Model {
     if (filters.device) where.device = filters.device;
     if (filters.agent) where.agent = filters.agent;
     if (filters.created_at) where.created_at = filters.created_at;
-    if (filters.date_from) where.created_at = { ...where.created_at, [Op.gte]: filters.date_from };
-    if (filters.date_to) where.created_at = { ...where.created_at, [Op.lte]: filters.date_to };
+    if (filters.date_from) {
+      where.created_at = { ...where.created_at, [Op.gte]: filters.date_from };
+    }
+    if (filters.date_to) {
+      where.created_at = { ...where.created_at, [Op.lte]: filters.date_to };
+    }
 
-    return query.where(where);
-  }
-}
+    return { where };
+  });
 
-UserActivity.init({
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  user_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  model_type: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  model_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  type: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  value: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  ip: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  device: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  agent: {
-    type: DataTypes.JSON,
-    allowNull: true
-  },
-  created_at: {
-    type: DataTypes.DATE,
-    allowNull: true
-  }
-}, {
-  sequelize,
-  modelName: 'UserActivity',
-  tableName: 'user_activities',
-  timestamps: false,
-  underscored: true
-});
-
-module.exports = UserActivity;
+  return UserActivity;
+};

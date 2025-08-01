@@ -7,8 +7,10 @@ const verifyToken = require('../../../../../middleware/verifyToken');
 const upload = require('../../../../../middleware/upload');
 const UserProfileController = require('../../../../../controllers/Api/v1/dashboard/user/UserProfileController');
 // const RequestModelController = require('../../../../../controllers/Api/v1/dashboard/user/RequestModelController');
-// const UserAddressController = require('../../../../../controllers/Api/v1/dashboard/user/UserAddressController');
 const  UserAddressController  = require('../../../../../controllers/Api/v1/dashboard/user/UserAddressController');
+const ProfileController = require('../../../../../controllers/Api/v1/dashboard/user/ProfileController');
+const UserActivityController = require('../../../../../controllers/Api/v1/dashboard/user/UserActivityController');
+
 // const cartRoutes = require('./cart');
 
 function authMiddleware(req, res, next) {
@@ -21,6 +23,14 @@ router.get('/user/userprofile', UserProfileController.index);
 router.post('/user/userprofile', UserProfileController.store);
 router.put('/user/userprofile/:id', UserProfileController.update);
 router.delete('/user/userprofile/:id', UserProfileController.destroy);
+// profile Routes Here
+router.post('/user/profile',authMiddleware, ProfileController.store);
+router.get('/user/profile',authMiddleware, ProfileController.show);
+router.put('/user/profile/:id',authMiddleware, ProfileController.update);
+router.delete('/user/profile/:id',authMiddleware, ProfileController.remove);
+//  User Activities Routes here
+router.get('/user/user-activities', authMiddleware, UserActivityController.index)
+router.post('/user/user-activities',authMiddleware, UserActivityController.storeMany)
 // Review Routes Here
 // router.post('/user/shops/review/:id', ShopController.addReview);
 // router.post('/user/blogs/review/:id', BlogController.addReview);

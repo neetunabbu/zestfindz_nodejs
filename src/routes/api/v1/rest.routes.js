@@ -7,10 +7,10 @@ const router = express.Router();
 
 
 
-router.get('/translations/paginate', settingController.translationsPaginate);
+router.get('/rest/translations/paginate', settingController.translationsPaginate);
 
-// GET /api/v1/rest/settings
-router.get('/settings', async (req, res) => {
+// GET /api/v1/dashboard/rest/settings
+router.get('/rest/settings', async (req, res) => {
   try {
     const settings = await Setting.findAll();
     return res.json({ success: true, data: settings });
@@ -20,8 +20,8 @@ router.get('/settings', async (req, res) => {
   }
 });
 
-// GET /api/v1/rest/languages/active
-router.get('/languages/active', async (req, res) => {
+// GET /api/v1/dashboard/rest/languages/active
+router.get('/rest/languages/active', async (req, res) => {
   try {
     const langs = await Language.findAll({ where: { status: 1 } });
     return res.json({ success: true, data: langs });
@@ -32,7 +32,7 @@ router.get('/languages/active', async (req, res) => {
 });
 
 // GET /api/v1/rest/currencies/active
-router.get('/currencies/active', async (req, res) => {
+router.get('/rest/currencies/active', async (req, res) => {
   try {
     const currs = await Currency.findAll({ where: { status: 1 } });
     return res.json({ success: true, data: currs });
@@ -42,8 +42,8 @@ router.get('/currencies/active', async (req, res) => {
   }
 });
 
-// GET /api/v1/rest/countries
-// router.get('/countries', async (req, res) => {
+// GET /api/v1/dashboard/rest/countries
+// router.get('/rest/countries', async (req, res) => {
 //   try {
 //     const { has_price, country_id } = req.query;
 //     const where = {};

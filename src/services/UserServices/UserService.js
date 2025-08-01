@@ -1,9 +1,9 @@
-const { User, Notification, UserWallet, WalletHistory, Transaction, Invitation } = require('../models');
-const ResponseError = require('../constants/responseError');
+const { User, Notification, WalletHistory, Transaction, Invitation } = require('../../models');
+const ResponseError = require('../../helpers/ResponseError');
 const bcrypt = require('bcrypt');
-const { sequelize } = require('../database');
+const { sequelize } = require('../../config/db');
 const UserWalletService = require('./UserWalletService');
-const logger = require('../logger');
+const logger = require('../../Traits/Loggable');
 
 class UserService {
   async create(data) {

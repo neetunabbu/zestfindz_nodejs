@@ -1,7 +1,7 @@
-const { Wallet, WalletHistory, Currency, User } = require('../models');
-const ResponseError = require('../constants/responseError');
+const { Wallet, WalletHistory, Currency, User } = require('../../models');
+const ResponseError = require('../../helpers/ResponseError');
 const { v4: uuidv4 } = require('uuid');
-const logger = require('../logger');
+const logger = require('../../Traits/Loggable');
 
 class UserWalletService {
   async create(user) {
