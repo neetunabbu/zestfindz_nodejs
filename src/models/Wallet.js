@@ -3,7 +3,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Wallet = sequelize.define('Wallet', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
@@ -13,11 +13,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     user_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     currency_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     price: {

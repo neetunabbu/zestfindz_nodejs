@@ -3,12 +3,12 @@
 module.exports = (sequelize, DataTypes) => {
   const Stock = sequelize.define('Stock', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true
     },
     product_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false
     },
     price: {
@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     discount_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true
     },
     tax: {

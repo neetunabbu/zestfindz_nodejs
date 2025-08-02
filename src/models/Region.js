@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   const Region = sequelize.define('Region', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
     },

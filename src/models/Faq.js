@@ -3,7 +3,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Faq = sequelize.define('Faq', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
     },

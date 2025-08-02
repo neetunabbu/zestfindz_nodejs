@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     },
     shop_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
   }, {

@@ -20,7 +20,7 @@ BannerProduct.init(
       allowNull: false,
     },
     interval: {
-      type: DataTypes.DOUBLE, // DOUBLE PRECISION
+      type: DataTypes.DOUBLE, 
       allowNull: false,
       defaultValue: 1,
     },

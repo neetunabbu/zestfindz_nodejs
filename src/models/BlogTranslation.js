@@ -2,12 +2,12 @@
 module.exports = (sequelize, DataTypes) => {
   const BannerTranslation = sequelize.define('BannerTranslation', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
     },
     banner_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     locale: {

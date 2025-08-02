@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   const DeliveryPoint = sequelize.define('DeliveryPoint', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
     },
@@ -15,19 +15,19 @@ module.exports = (sequelize) => {
       defaultValue: false,
     },
     region_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     country_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     city_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
     area_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
     price: {

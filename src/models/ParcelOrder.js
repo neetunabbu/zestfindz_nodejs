@@ -3,12 +3,12 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   const ParcelOrder = sequelize.define('ParcelOrder', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       autoIncrement: true,
       primaryKey: true
     },
     user_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true
     },
     total_price: {
@@ -17,11 +17,11 @@ module.exports = (sequelize) => {
       comment: 'Сумма с учётом всех налогов и скидок'
     },
     currency_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true
     },
     type_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true
     },
     rate: {
@@ -89,7 +89,7 @@ module.exports = (sequelize) => {
       defaultValue: 0
     },
     deliveryman_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true
     },
     current: {

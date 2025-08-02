@@ -3,12 +3,12 @@
 module.exports = (sequelize, DataTypes) => {
   const ShopTranslation = sequelize.define('ShopTranslation', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       autoIncrement: true,
       primaryKey: true,
     },
     shop_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false,
       unique: true
     },

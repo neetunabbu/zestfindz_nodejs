@@ -16,7 +16,7 @@ module.exports = (sequelize) => {
   PushNotification.init(
     {
       id: {
-        type: DataTypes.BIGINT.UNSIGNED,
+        type: DataTypes.BIGINT,
         primaryKey: true,
         autoIncrement: true
       },
@@ -25,7 +25,7 @@ module.exports = (sequelize) => {
         allowNull: false
       },
       model_id: {
-        type: DataTypes.BIGINT.UNSIGNED,
+        type: DataTypes.BIGINT,
         allowNull: false
       },
       type: {
@@ -52,7 +52,7 @@ module.exports = (sequelize) => {
         }
       },
       user_id: {
-        type: DataTypes.BIGINT.UNSIGNED,
+        type: DataTypes.BIGINT,
         allowNull: true
       },
       read_at: {

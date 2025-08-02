@@ -3,12 +3,12 @@
 module.exports = (sequelize, DataTypes) => {
   const ReferralTranslation = sequelize.define('ReferralTranslation', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true
     },
     referral_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false
     },
     title: {

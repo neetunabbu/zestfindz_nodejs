@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Unit = sequelize.define('Unit', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false,

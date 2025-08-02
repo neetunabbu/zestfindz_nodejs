@@ -3,12 +3,12 @@
 module.exports = (sequelize, DataTypes) => {
   const FaqTranslation = sequelize.define('FaqTranslation', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
     },
     faq_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     locale: {

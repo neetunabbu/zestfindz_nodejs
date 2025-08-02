@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   const City = sequelize.define('City', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
     },
@@ -15,11 +15,11 @@ module.exports = (sequelize) => {
       defaultValue: 0,
     },
     region_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
     country_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
   }, {

@@ -17,12 +17,12 @@ module.exports = (sequelize) => {
   WholeSalePrice.init(
     {
       id: {
-        type: DataTypes.BIGINT.UNSIGNED,
+        type: DataTypes.BIGINT,
         primaryKey: true,
         autoIncrement: true,
       },
       stock_id: {
-        type: DataTypes.BIGINT.UNSIGNED,
+        type: DataTypes.BIGINT,
         allowNull: false,
       },
       min_quantity: {

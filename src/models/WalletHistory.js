@@ -3,7 +3,7 @@ const sequelize = require('../config/db');
 
 const WalletHistory = sequelize.define('WalletHistory', {
   id: {
-    type: DataTypes.BIGINT.UNSIGNED,
+    type: DataTypes.BIGINT,
     primaryKey: true,
     autoIncrement: true,
   },
@@ -17,7 +17,7 @@ const WalletHistory = sequelize.define('WalletHistory', {
     allowNull: false,
   },
   transaction_id: {
-    type: DataTypes.BIGINT.UNSIGNED,
+    type: DataTypes.BIGINT,
     allowNull: true,
   },
   type: {
@@ -40,7 +40,7 @@ const WalletHistory = sequelize.define('WalletHistory', {
     defaultValue: 'processed',
   },
   created_by: {
-    type: DataTypes.BIGINT.UNSIGNED,
+    type: DataTypes.BIGINT,
     allowNull: false,
   },
   created_at: {

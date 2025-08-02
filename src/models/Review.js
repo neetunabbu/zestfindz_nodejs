@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       reviewable_id: {
-        type: DataTypes.BIGINT.UNSIGNED,
+        type: DataTypes.BIGINT,
         allowNull: false,
       },
       assignable_type: {
@@ -49,11 +49,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       assignable_id: {
-        type: DataTypes.BIGINT.UNSIGNED,
+        type: DataTypes.BIGINT,
         allowNull: true,
       },
       user_id: {
-        type: DataTypes.BIGINT.UNSIGNED,
+        type: DataTypes.BIGINT,
         allowNull: true,
       },
       rating: {

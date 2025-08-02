@@ -3,7 +3,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Referral = sequelize.define('Referral', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true
     },
