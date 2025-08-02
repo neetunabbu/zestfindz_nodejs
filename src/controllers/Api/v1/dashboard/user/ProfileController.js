@@ -1,5 +1,5 @@
 const ResponseError = require('../../../../../helpers/ResponseError');
-const UserResource = require('../../../../../resources/UserResource');
+const UserResource = require('../../../../../resources/userResource');
 const NotificationResource = require('../../../../../resources/NotificationResource');
 const { UserProfile } = require('../../../../../models');
 const UserService = require('../../../../../services/UserServices/UserService');
