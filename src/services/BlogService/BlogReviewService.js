@@ -1,30 +1,30 @@
-'use strict';
-
-const BlogService = require('./BlogService');
+const { BlogReview } = require('../../models');
 const ResponseError = require('../../helpers/ResponseError');
 
-class BlogReviewService extends BlogService {
-  constructor(language = null, currency = null) {
-    super(language, currency);
-  }
-  getModelClass() {
-    return this.model;  
-  }
-
+const BlogReviewService = {
   async addReview(blog, reviewData) {
     try {
       if (typeof blog.createReview === 'function') {
-        await blog.createReview(reviewData);
+        await blog.createReview(reviewData); // If Sequelize association is defined
       } else {
-        throw new Error('createReview method not defined on Blog model instance. Please ensure associations are set correctly.');
+        reviewData.blog_id = blog.id;
+        await BlogReview.create(reviewData); // Direct fallback
       }
-      return { status: true, code: ResponseError.NO_ERROR, data: blog };
 
+      return {
+        status: true,
+        code: ResponseError.NO_ERROR,
+        data: blog
+      };
     } catch (error) {
       console.error('BlogReviewService.addReview error:', error);
-      return { status: false, code: ResponseError.ERROR_400, message: error.message };
+      return {
+        status: false,
+        code: ResponseError.ERROR_502,
+        message: error.message
+      };
     }
   }
-}
+};
 
 module.exports = BlogReviewService;

@@ -1,142 +1,106 @@
-// File: D:/zestfindz_nodejs/src/services/CoreService.js
-
 const { Currency, Language } = require('../models');
 const ResponseError = require('../helpers/ResponseError');
 // const ApiResponse = require('../Traits/ApiResponse');
-const Loggable = require('../Traits/Loggable');
-const cache = require('../utils/cache'); // Assume cache utility (e.g., NodeCache or Redis)
+const logger = require('../Traits/Loggable');
+const cache = require('../utils/cache'); 
 
-class CoreService {
-  constructor(language = null, currency = null) {
-    this.model = this.getModelClass();
-    this.language = language || null;
-    this.currency = currency || null;
+function cloneModel(Model) {
+  return Model;
+}
+
+async function setCurrency(req) {
+  try {
+    return (
+      req?.query?.currency_id ||
+      (await Currency.findOne({ where: { is_default: true } }))?.id ||
+      null
+    );
+  } catch (e) {
+    logger.error('setCurrency error', e);
+    return null;
   }
-  error(e) {
-    console.error(`[${this.constructor.name}]`, e.message || e);
+}
+
+async function setLanguage(req) {
+  try {
+    return (
+      req?.query?.lang ||
+      (await Language.findOne({ where: { is_default: true } }))?.locale ||
+      'en'
+    );
+  } catch (e) {
+    logger.error('setLanguage error', e);
+    return 'en';
   }
-  /**
-   * Should be overridden by child class
-   */
-  getModelClass() {
-    throw new Error('You must implement getModelClass() in subclass');
-  }
+}
 
-  /**
-   * Returns a clone of the model (like app()->make in Laravel)
-   */
-  model() {
-    return this.model;
-  }
+async function dropAll(Model, req, exclude = null) {
+  try {
+    const query = {};
 
-  /**
-   * Set currency from request or default
-   */
-  async setCurrency(req) {
-    const currencyId = req?.query?.currency_id;
-    if (currencyId) return currencyId;
-
-    const defaultCurrency = await Currency.findOne({ where: { default: true } });
-    return defaultCurrency?.id || null;
-  }
-
-  /**
-   * Set language from request or default
-   */
-  async setLanguage(req) {
-    const lang = req?.query?.lang;
-    if (lang) return lang;
-
-    const defaultLang = await Language.findOne({ where: { default: true } });
-    return defaultLang?.locale || null;
-  }
-
-  /**
-   * Delete all records except excluded
-   */
-  async dropAll(exclude = {}) {
-    try {
-      const whereClause = exclude.column && exclude.value
-        ? { [exclude.column]: { [Op.ne]: exclude.value } }
-        : {};
-
-      const models = await this.model().findAll({ where: whereClause });
-
-      for (const model of models) {
-        try {
-          await model.destroy();
-        } catch (e) {
-          Loggable.error(e);
-        }
-      }
-
-      const s = cache.get('rjkcvd.ewoidfh');
-      cache.flushAll();
-      if (s) cache.set('rjkcvd.ewoidfh', s);
-
-      return { status: true, code: ResponseError.NO_ERROR };
-    } catch (e) {
-      Loggable.error(e);
-      return { status: false, code: ResponseError.ERROR_500, message: e.message };
+    if (exclude?.column && exclude?.value !== undefined) {
+      query[exclude.column] = { [Op.ne]: exclude.value };
     }
-  }
 
-  /**
-   * Destroy models by IDs
-   */
-  async destroy(ids = []) {
-    try {
-      const models = await this.model().findAll({ where: { id: ids } });
+    const models = await Model.findAll({ where: query });
 
-      for (const model of models) {
-        try {
-          await model.destroy();
-        } catch (e) {
-          Loggable.error(e);
-        }
+    for (const record of models) {
+      try {
+        await record.destroy();
+      } catch (err) {
+        logger.error('Drop error', err);
       }
-
-      const s = cache.get('rjkcvd.ewoidfh');
-      cache.flushAll();
-      if (s) cache.set('rjkcvd.ewoidfh', s);
-    } catch (e) {
-      Loggable.error(e);
     }
+
+    const s = await cache.get('rjkcvd.ewoidfh');
+    await cache.flush();
+    await cache.set('rjkcvd.ewoidfh', s);
+
+    return { status: true, code: ResponseError.NO_ERROR };
+  } catch (error) {
+    logger.error('dropAll error', error);
+    return { status: false, code: ResponseError.ERROR_500, message: error.message };
   }
+}
 
-  /**
-   * Wrapper for destroy
-   */
-  async delete(ids = []) {
-    await this.destroy(ids);
-
-    const s = cache.get('rjkcvd.ewoidfh');
-    cache.flushAll();
-    if (s) cache.set('rjkcvd.ewoidfh', s);
+async function destroy(Model, ids = []) {
+  try {
+    const records = await Model.findAll({ where: { id: ids } });
+    for (const record of records) {
+      try {
+        await record.destroy();
+      } catch (e) {
+        logger.error('destroy error', e);
+      }
+    }
+    const s = await cache.get('rjkcvd.ewoidfh');
+    await cache.flush();
+    await cache.set('rjkcvd.ewoidfh', s);
+  } catch (error) {
+    logger.error('destroy outer error', error);
   }
+}
 
-  /**
-   * Remove models by column and optional filter
-   */
-  async remove(ids = [], column = 'id', when = { column: null, value: null }) {
-    const errorIds = [];
+async function remove(Model, ids = [], column = 'id', when = { column: null, value: null }, language = 'en') {
+  const errorIds = [];
 
-    const whereClause = {
+  try {
+    const where = {
       [column]: ids,
     };
 
-    if (when.column && when.value) {
-      whereClause[when.column] = when.value;
+    if (when?.column && when?.value !== undefined) {
+      where[when.column] = when.value;
     }
 
-    const models = await this.model().findAll({ where: whereClause });
+    const records = await Model.findAll({ where });
 
-    for (const model of models) {
+    for (const record of records) {
       try {
-        await model.destroy();
+        await record.destroy();
       } catch (e) {
-        Loggable.error(e);
-        errorIds.push(model.id);
+        logger.error('remove error', e);
+        errorIds.push(record.id);
       }
     }
 
@@ -147,9 +111,24 @@ class CoreService {
     return {
       status: false,
       code: ResponseError.ERROR_505,
-      message: `Cannot delete IDs: ${errorIds.join(', ')}`,
+      message: `Can't delete IDs: ${errorIds.join(', ')}`,
+    };
+  } catch (error) {
+    logger.error('remove outer error', error);
+    return {
+      status: false,
+      code: ResponseError.ERROR_500,
+      message: error.message,
     };
   }
 }
 
-module.exports = CoreService;
+module.exports = {
+  setCurrency,
+  setLanguage,
+  dropAll,
+  destroy,
+  remove,
+  cloneModel,
+};
+

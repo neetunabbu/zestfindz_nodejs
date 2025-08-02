@@ -1,5 +1,3 @@
-// TranslationResource.js
-
 function TranslationResource(data) {
     return {
         id: parseInt(data.id, 10),

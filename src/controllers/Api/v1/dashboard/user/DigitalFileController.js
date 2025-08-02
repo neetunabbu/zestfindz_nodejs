@@ -2,7 +2,6 @@ const DigitalFileService = require('../../../../../services/DigitalFileService/D
 const DigitalFileRepository = require('../../../../../repositories/DigitalFileRepository/DigitalFileRepository');
 
 const digitalFileRepository = new DigitalFileRepository();
-const digitalFileService = new DigitalFileService();
 
 const DigitalFileController = {
   // GET /digital-files
@@ -28,7 +27,7 @@ const DigitalFileController = {
   async myDigitalFiles(req, res) {
     try {
       const filter = req.query;
-      const userId = 1;
+      const userId = req.user?.id || 1;
 
       if (!userId) {
         return res.status(401).json({ status: 'fail', message: 'Unauthorized' });
@@ -53,14 +52,14 @@ const DigitalFileController = {
   async getDigitalFile(req, res) {
     try {
       const id = req.params.id || '1';
-      const userId = req.user?.user_id || 1 ;
+      const userId = req.user?.id || 1;
 
       if (!userId) {
         return res.status(401).json({ status: 'fail', message: 'Unauthorized' });
       }
 
       const model = await digitalFileRepository.getDigitalFile(id, userId);
-      const result = await digitalFileService.getDigitalFile(model);
+      const result = await DigitalFileService.getDigitalFile(model);
 
       if (!result.status) {
         return res.status(404).json({
@@ -69,15 +68,10 @@ const DigitalFileController = {
         });
       }
 
-      const filePath = result.data;
-
-      // For download: Option 1 - Send presigned link or S3 path
       return res.status(200).json({
         status: 'success',
-        fileUrl: filePath,
+        fileUrl: result.data,
       });
-
-    //    To stream or force-download the file, you'd need signed URLs or proxy from S3.
     } catch (err) {
       console.error('Get Digital File Error:', err);
       return res.status(500).json({
@@ -90,7 +84,7 @@ const DigitalFileController = {
   // POST /digital-files
   async uploadFile(req, res) {
     try {
-      const userId = req.user?.user_id;
+      const userId = req.user?.id;
       const file = req.file;
 
       if (!file) {
@@ -103,7 +97,7 @@ const DigitalFileController = {
         user_id: userId,
       };
 
-      const result = await digitalFileService.create(data);
+      const result = await DigitalFileService.create(data);
 
       if (!result.status) {
         return res.status(400).json({
@@ -112,10 +106,12 @@ const DigitalFileController = {
         });
       }
 
+      const [modelInstance] = result.data; // destructure from upsert()
+
       return res.status(201).json({
         status: 'success',
         message: 'File uploaded successfully',
-        data: result.data,
+        data: modelInstance,
       });
     } catch (err) {
       console.error('Upload Error:', err);
@@ -124,7 +120,7 @@ const DigitalFileController = {
         message: 'Internal Server Error',
       });
     }
-  },
+  }
 };
 
 module.exports = DigitalFileController;

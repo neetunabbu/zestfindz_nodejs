@@ -1,38 +1,38 @@
-// src/controllers/api/v1/dashboard/user/ShopController.js
-
-const ShopService = require('../../../../../services/ShopServices/ShopService'); // Assuming you have this base service
+const { Shop } = require('../../../../../models');
 const ShopReviewService = require('../../../../../services/ShopServices/ShopReviewService');
-
-// Instantiate services (optionally pass language, currency)
-const shopService = new ShopService('en', 'USD');
-const shopReviewService = new ShopReviewService('en', 'USD');
+const { successResponse, errorResponse } = require('../../../../../Traits/ApiResponse');
+// const ResponseError = require('../../../../../helpers/ResponseError');
 
 const ShopController = {
-  async addReview(req, res) {
-    try {
-      // Get the shop model instance
-      const shop = await shopService.model.findByPk(req.params.id);
 
+  addReviews: async (req, res) => {
+    try {
+      const shopId = req.params.id;
+
+      const shop = await Shop.findByPk(shopId);
       if (!shop) {
-        return res.status(404).json({ status: 'fail', message: 'Shop not found' });
+        return errorResponse(res, 404, 'Shop not found');
       }
 
-      const reviewData = req.body;
-      // Optionally attach user_id if you have authenticated user info
-      // reviewData.user_id = req.user.id;
-
-      const result = await shopReviewService.addReview(shop, reviewData);
+      const result = await ShopReviewService.addReview(req, shop, req.body);
 
       if (!result.status) {
-        return res.status(400).json({ status: 'fail', message: result.message });
+        return errorResponse(res, 400, result.message || 'Failed to add review');
       }
 
-      return res.json({ status: 'success', message: 'Review added successfully', data: result.data });
+      return successResponse(
+        res,
+        'Review added successfully',
+        result.data 
+      );
+
     } catch (error) {
-      console.error('ShopController.addReview error:', error);
-      return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+      console.error('ShopController.addReviews error:', error);
+      return errorResponse(res, 500, 'Something went wrong', error.message);
     }
-  },
+  }
+
 };
 
 module.exports = ShopController;
+

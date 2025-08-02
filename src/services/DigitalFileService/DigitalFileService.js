@@ -1,17 +1,11 @@
-// src/services/DigitalFileService/DigitalFileService.js
 const { Op } = require('sequelize');
-const CoreService = require('../CoreService');
 const ResponseError = require('../../helpers/ResponseError');
-const { DigitalFile, Settings, UserDigitalFile, Product } = require('../../models');
+const { DigitalFile, Settings, Product } = require('../../models');
 const fs = require('fs');
 const path = require('path');
 const { uploadFileToS3 } = require('../../utils/uploadToS3Buffer');
 
-class DigitalFileService extends CoreService {
-  getModelClass() {
-    return DigitalFile;
-  }
-
+const DigitalFileService = {
   async create(data) {
     try {
       const awsSetting = await Settings.findOne({ where: { key: 'aws' } });
@@ -29,17 +23,17 @@ class DigitalFileService extends CoreService {
 
       data.path = filePath;
 
-      const model = await this.getModelClass().upsert({
+      const model = await DigitalFile.upsert({
         product_id: data.product_id || 1,
         ...data,
       });
 
       return { status: true, code: ResponseError.NO_ERROR, data: model };
     } catch (e) {
-      this.error?.(e);
+      console.error('DigitalFileService.create error:', e);
       return { status: false, code: ResponseError.ERROR_501, message: e.message };
     }
-  }
+  },
 
   async update(model, data) {
     try {
@@ -57,10 +51,10 @@ class DigitalFileService extends CoreService {
 
       return { status: true, code: ResponseError.NO_ERROR, data: model };
     } catch (e) {
-      this.error(e);
+      console.error('DigitalFileService.update error:', e);
       return { status: false, code: ResponseError.ERROR_502, message: e.message };
     }
-  }
+  },
 
   async delete(ids = [], shopId = null) {
     try {
@@ -77,11 +71,10 @@ class DigitalFileService extends CoreService {
 
       return { status: true, code: ResponseError.NO_ERROR };
     } catch (e) {
-      this.error(e);
-      console.error(e);
+      console.error('DigitalFileService.delete error:', e);
       return { status: false, code: ResponseError.ERROR_503, message: e.message };
     }
-  }
+  },
 
   async changeActive(id, shopId = null) {
     try {
@@ -105,10 +98,10 @@ class DigitalFileService extends CoreService {
         data: model,
       };
     } catch (e) {
-      this.error(e);
+      console.error('DigitalFileService.changeActive error:', e);
       return { status: false, code: ResponseError.ERROR_502, message: e.message };
     }
-  }
+  },
 
   async getDigitalFile(model) {
     try {
@@ -137,10 +130,10 @@ class DigitalFileService extends CoreService {
         data: model.digitalFile.path,
       };
     } catch (e) {
-      this.error(e);
+      console.error('DigitalFileService.getDigitalFile error:', e);
       return { status: false, code: ResponseError.ERROR_504, message: e.message };
     }
   }
-}
+};
 
 module.exports = DigitalFileService;

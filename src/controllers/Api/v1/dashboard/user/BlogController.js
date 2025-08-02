@@ -1,37 +1,47 @@
-const BlogService = require('../../../../../services/BlogService/BlogService');
+const { Blog } = require('../../../../../models');
 const BlogReviewService = require('../../../../../services/BlogService/BlogReviewService');
-
-// instantiate services (optionally pass language, currency)
-const blogService = new BlogService('en', 'USD');
-const blogReviewService = new BlogReviewService('en', 'USD');
+const { successResponse, errorResponse } = require('../../../../../Traits/ApiResponse');
+const ResponseError = require('../../../../../helpers/ResponseError');
+const BlogResource = require('../../../../../resources/BlogResource');
 
 const BlogController = {
- async addReview(req, res) {
-  try {
-    // Access model property directly, without parentheses
-    const blog = await blogService.model.findByPk(req.params.id);
+  // POST /user/blogs/review/:id
+  async addReviews(req, res) {
+    try {
+      const blogId = req.params.id;
+      const reviewData = req.body;
 
-    if (!blog) {
-      return res.status(404).json({ status: 'fail', message: 'Blog not found' });
+      const blog = await Blog.findByPk(blogId);
+      if (!blog) {
+        return res.status(404).json({
+          status: false,
+          code: ResponseError.ERROR_404,
+          message: 'Blog not found'
+        });
+      }
+
+      const result = await BlogReviewService.addReview(blog, reviewData);
+
+      if (!result.status) {
+        return res.status(400).json({
+          status: false,
+          message: result.message
+        });
+      }
+
+      return res.status(200).json({
+        status: true,
+        message: 'Review added successfully',
+        data: result.data
+      });
+    } catch (error) {
+      console.error('BlogController.addReviews error:', error);
+      return res.status(500).json({
+        status: false,
+        message: 'Something went wrong'
+      });
     }
-
-    const reviewData = req.body;
-    // You may want to attach user_id if applicable
-    // reviewData.user_id = req.user.id;
-
-    const result = await blogReviewService.addReview(blog, reviewData);
-
-    if (!result.status) {
-      return res.status(400).json({ status: 'fail', message: result.message });
-    }
-
-    return res.json({ status: 'success', message: 'Review added Successfully', data: result.data });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
   }
-}
-
 };
 
 module.exports = BlogController;
