@@ -1,14 +1,13 @@
-// File: D:/zestfindz_nodejs/src/repositories/ShopTagRepository/ShopTagRepository.js
+// Updated: src/repositories/ShopTagRepository/ShopTagRepository.js
 
 const { Op } = require('sequelize');
 const { ShopTag } = require('../../models/ShopTag');
 const { Language } = require('../../models/Language');
-const { CoreRepository } = require('../CoreRepository');
-
+const CoreRepository = require('../../repositories/CoreRepository');
 
 class ShopTagRepository extends CoreRepository {
-  constructor() {
-    super(ShopTag);
+  constructor(req) {
+    super(req, ShopTag);
   }
 
   async paginate(data = {}) {
@@ -29,15 +28,13 @@ class ShopTagRepository extends CoreRepository {
       };
     }
 
-    const page = data.page || 1;
-    const perPage = data.perPage || 10;
+    const page = parseInt(data.page) || 1;
+    const perPage = parseInt(data.perPage) || 10;
     const offset = (page - 1) * perPage;
 
     const result = await ShopTag.findAndCountAll({
       include: [
-        {
-          association: 'translations',
-        },
+        { association: 'translations' },
         {
           association: 'translation',
           where: whereTranslation,
@@ -47,7 +44,7 @@ class ShopTagRepository extends CoreRepository {
       where: whereSearch,
       order: [[data.column || 'id', data.sort || 'DESC']],
       limit: perPage,
-      offset: offset,
+      offset,
     });
 
     return {
@@ -72,9 +69,7 @@ class ShopTagRepository extends CoreRepository {
 
     return await ShopTag.findByPk(shopTagInstance.id, {
       include: [
-        {
-          association: 'translations',
-        },
+        { association: 'translations' },
         {
           association: 'translation',
           where: whereTranslation,
@@ -85,4 +80,4 @@ class ShopTagRepository extends CoreRepository {
   }
 }
 
-module.exports = new ShopTagRepository();
+module.exports = ShopTagRepository;

@@ -1,5 +1,5 @@
-const galleryResource = require('./galleryResource');
-const translationResource = require('./translationResource');
+const galleryResource = require('./GalleryResource');
+const translationResource = require('./TranslationResource');
 
 const formatDate = (date) =>
   date ? new Date(date).toISOString().replace('T', ' ').substring(0, 19) + 'Z' : null;
@@ -29,6 +29,11 @@ const shopTagResource = (shopTagInstance) => {
       : [],
     locales: locales ?? null,
   };
+};
+
+// Add a .collection() method for array mapping (like Laravel)
+shopTagResource.collection = (items) => {
+  return Array.isArray(items) ? items.map(shopTagResource) : [];
 };
 
 module.exports = shopTagResource;

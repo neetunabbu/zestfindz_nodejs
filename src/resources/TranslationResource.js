@@ -1,16 +1,29 @@
-function TranslationResource(data) {
-    return {
-        id: parseInt(data.id, 10),
-        locale: String(data.locale),
-        ...(data.title && { title: String(data.title) }),
-        ...(data.short_desc && { short_desc: String(data.short_desc) }),
-        ...(data.description && { description: String(data.description) }),
-        ...(data.button_text && { button_text: String(data.button_text) }),
-        ...(data.address && { address: String(data.address) }),
-        ...(data.question && { question: String(data.question) }),
-        ...(data.answer && { answer: String(data.answer) }),
-        ...(data.faq && { faq: String(data.faq) }),
-    };
-}
+// src/resources/TranslationResource.js
 
-module.exports = TranslationResource;
+const BannerTranslation = require('../models/BannerTranslation');
+const BlogTranslation = require('../models/BlogTranslation');
+const FaqTranslation = require('../models/FaqTranslation');
+const ReferralTranslation = require('../models/ReferralTranslation');
+const ShopTranslation = require('../models/ShopTranslation');
+const Translation = require('../models/Translation'); // main translation model
+
+const formatTranslation = (translation) => {
+  if (!translation) return null;
+
+  return {
+    id: Number(translation.id),
+    locale: String(translation.locale),
+    title: translation.title ? String(translation.title) : undefined,
+    short_desc: translation.short_desc ? String(translation.short_desc) : undefined,
+    description: translation.description ? String(translation.description) : undefined,
+    button_text: translation.button_text ? String(translation.button_text) : undefined,
+    address: translation.address ? String(translation.address) : undefined,
+    question: translation.question ? String(translation.question) : undefined,
+    answer: translation.answer ? String(translation.answer) : undefined,
+    faq: translation.faq ? String(translation.faq) : undefined,
+  };
+};
+
+module.exports = {
+  formatTranslation,
+};

@@ -1,4 +1,3 @@
-
 const express = require('express');
 const app = express();
 require('dotenv').config(); 
@@ -20,9 +19,7 @@ const bankDocRoutes = require("./src/routes/api/v1/Dashboard/seller/be-seller/ba
 const shopRoutes = require("./src/routes/api/v1/Dashboard/seller/be-seller/shop");
 const becomeSellerRoutes = require("./src/routes/api/v1/Dashboard/seller/be-seller/becomeSeller");
 
-
 const mockAuth = require('./src/middleware/mockAuth');
-
 
 app.use('/api/admin', (req, res, next) => {
     try {
@@ -43,18 +40,16 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1', bankDocRoutes);
 app.use('/api/v1', shopRoutes);
 
-
-
-
 const userLoginRoutes = require('./src/routes/api/v1/userLogin.routes');
 app.use('/api/v1/auth', userLoginRoutes);
 
 const restRoutes = require('./src/routes/api/v1/rest.routes');
 app.use('/api/v1/rest', restRoutes);
 
-// seller Routes
+// ✅ ✅ FIXED: Load sellerApiRoutes before using again below
 const sellerApiRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
 app.use('/api/v1', sellerApiRoutes);
+
 // Admin Routes
 const adminApiRoutes = require('./src/routes/api/v1/Dashboard/admin/apiRoutes');
 app.use('/api/v1/dashboard', adminApiRoutes);
@@ -71,9 +66,19 @@ app.get('/test', (req, res) => {
     res.json({ message: '✅ Test route is working!' });
 });
 
+// 404 handler
 app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
 
-module.exports = app;
+// ✅ Global error handler (must be last middleware)
+app.use((err, req, res, next) => {
+    console.error("🔥 ERROR:", err.stack || err.message || err);
+    res.status(500).json({
+        success: false,
+        message: "Something went wrong!",
+        error: err.message || err,
+    });
+});
 
+module.exports = app;

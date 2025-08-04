@@ -1,4 +1,6 @@
-const Loggable = require('./Loggable');
+const Loggable= require('../Traits/Loggable');
+// const loggable = require('./Loggable');
+
 
 // Mixin for currency handling
 const SetCurrency = (sequelize) => {

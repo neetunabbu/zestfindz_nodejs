@@ -1,4 +1,6 @@
-const Utility = require("../helpers/utility");
+const Utility = require("../helpers/Utility");
+const { User} = require("../models/User");
+
 const {
   Order,
   Shop,

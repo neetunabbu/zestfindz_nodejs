@@ -148,4 +148,4 @@ const ResponseError = {
   TOTAL_PRICE_WITHOUT_TAX: 'TOTAL_PRICE_WITHOUT_TAX',
 };
 
-module.exports = ResponseError;
+module.exports = { ResponseError };

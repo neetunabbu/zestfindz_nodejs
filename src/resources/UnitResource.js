@@ -1,23 +1,43 @@
-const { translationResource } = require('./TranslationResource');
+// src/resources/UnitResource.js
 
-function unitResource(unit) {
-  const formatDate = (date) =>
-    date ? new Date(date).toISOString().replace('T', ' ').replace('.000Z', 'Z') : null;
+const Unit = require('../models/Unit'); // Equivalent to: use App\Models\Unit
+const TranslationResource = require('./TranslationResource');
 
-  const locales = unit.translations ? unit.translations.map(t => t.locale) : null;
+/**
+ * Convert a Unit model instance to a plain JS object (resource format).
+ *
+ * @param {Object} unit - Sequelize instance of Unit with relations preloaded.
+ * @returns {Object}
+ */
+function toUnitResource(unit) {
+  const locales = unit.translations
+    ? unit.translations.map(t => t.locale)
+    : null;
 
   return {
-    id: Number(unit.id),
-    active: Boolean(unit.active),
-    position: unit.position?.toString() ?? null,
-    created_at: formatDate(unit.created_at),
-    updated_at: formatDate(unit.updated_at),
+    id: unit.id ?? null,
+    active: !!unit.active,
+    position: unit.position?.toString() ?? '',
+    created_at: unit.createdAt
+      ? new Date(unit.createdAt).toISOString().replace('T', ' ').slice(0, 19) + 'Z'
+      : null,
+    updated_at: unit.updatedAt
+      ? new Date(unit.updatedAt).toISOString().replace('T', ' ').slice(0, 19) + 'Z'
+      : null,
 
     // Relations
-    translation: unit.translation ? translationResource(unit.translation) : null,
-    translations: unit.translations ? unit.translations.map(translationResource) : [],
-    locales,
+    translation: unit.translation
+      ? TranslationResource.toTranslationResource(unit.translation)
+      : null,
+
+    translations: unit.translations
+      ? unit.translations.map(TranslationResource.toTranslationResource)
+      : [],
+
+    locales: locales ?? null,
   };
 }
 
-module.exports = { unitResource };
+module.exports = {
+  toUnitResource,
+};
