@@ -1,7 +1,9 @@
+'use strict';
+
 module.exports = (sequelize, DataTypes) => {
   const Unit = sequelize.define('Unit', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false,
@@ -26,14 +28,21 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     tableName: 'units',
-    timestamps: false, 
-    underscored: true, 
+    underscored: true,
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
   });
 
   Unit.associate = (models) => {
     Unit.hasMany(models.Product, {
       foreignKey: 'unit_id',
       as: 'products',
+    });
+
+    Unit.hasMany(models.UnitTranslation, {
+      foreignKey: 'unit_id',
+      as: 'translation', // Must match 'as' in include
     });
   };
 

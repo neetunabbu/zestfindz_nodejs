@@ -3,12 +3,16 @@ const router = express.Router();
 const CategoryController = require('../../../../../controllers/Api/v1/dashboard/seller/categoryController');
 const BrandController = require('../../../../../controllers/Api/v1/dashboard/seller/brandController');
 const TagController = require('../../../../../controllers/API/v1/Dashboard/Seller/TagController'); // ✅ NEW
+const UnitController = require('../../../../../controllers/API/v1/Dashboard/Seller/UnitController');
 const sequelize = require('../../../../../config/db');
 const upload = require('../../../../../helpers/ImageUpload');
 
 const brandController = BrandController(sequelize);
 const categoryController = CategoryController(sequelize);
 const tagController = TagController; // ✅ NEW
+const unitController = UnitController; 
+// const tagController = TagController(sequelize); 
+// const tagController = require('../../../../../controllers/API/v1/Dashboard/Seller/TagController');
 
 const authMiddleware = (req, res, next) => {
   req.userId = 1;
@@ -71,5 +75,12 @@ router.get('/seller/tags/:id', authMiddleware, tagController.show);
 router.put('/seller/tags/:id', authMiddleware, tagController.update);
 router.delete('/seller/tags/delete', authMiddleware, tagController.destroy);
 router.get('/seller/shop-tags/paginate', authMiddleware, tagController.shopTagsPaginate);
+
+// -------- Seller Unit Routes -------- ✅ NEW
+router.get('/seller/units', authMiddleware, unitController.paginate);
+router.get('/seller/units/:id', authMiddleware, unitController.show);
+
+
+router.get('/units', UnitController.paginate);
 
 module.exports = router;

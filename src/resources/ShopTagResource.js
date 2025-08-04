@@ -31,4 +31,9 @@ const shopTagResource = (shopTagInstance) => {
   };
 };
 
+// Add a .collection() method for array mapping (like Laravel)
+shopTagResource.collection = (items) => {
+  return Array.isArray(items) ? items.map(shopTagResource) : [];
+};
+
 module.exports = shopTagResource;

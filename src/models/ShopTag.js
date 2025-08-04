@@ -1,21 +1,25 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db"); // adjust path if needed
+// src/models/ShopTag.js
 
-const ShopTag = sequelize.define("ShopTag", {
-  id: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    autoIncrement: true,
-    primaryKey: true,
-  },
-  img: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-  },
-}, {
-  tableName: "shop_tags",
-  timestamps: true,
-  paranoid: true,          // for soft deletes (equivalent to Laravel's `deleted_at`)
-  underscored: true,       // snake_case in DB
-});
+module.exports = (sequelize, DataTypes) => {
+  const ShopTag = sequelize.define('ShopTag', {
+    id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    // your other fields...
+  }, {
+    tableName: 'shop_tags',
+    timestamps: false,
+    underscored: true,
+  });
 
-module.exports = ShopTag;
+  ShopTag.associate = (models) => {
+    ShopTag.hasMany(models.ShopTagTranslation, {
+      foreignKey: 'shop_tag_id',
+      as: 'translations',
+    });
+  };
+
+  return ShopTag;
+};

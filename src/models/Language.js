@@ -1,8 +1,9 @@
-// models/language.js
+// src/models/Language.js
+const sequelize = require('../config/db'); 
 module.exports = (sequelize, DataTypes) => {
   const Language = sequelize.define('Language', {
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
     },

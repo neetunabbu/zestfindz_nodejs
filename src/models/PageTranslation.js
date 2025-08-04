@@ -31,4 +31,4 @@ const PageTranslation = sequelize.define("PageTranslation", {
   underscored: true,              // Laravel snake_case columns
 });
 
-module.exports = { PageTranslation };
+module.exports = PageTranslation;

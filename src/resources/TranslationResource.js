@@ -1,33 +1,29 @@
-// Import all translation models
-const { BannerTranslation } = require("../models/BannerTranslation");
-const { BlogTranslation } = require("../models/BlogTranslation");
-const { FaqTranslation } = require("../models/FaqTranslation");
-const { CategoryTranslation } = require("../models/CategoryTranslation");
-const { PageTranslation } = require("../models/PageTranslation");
-// const { QuestionTranslation } = require("../Models/QuestionTranslation");
+// src/resources/TranslationResource.js
 
-/**
- * Resource transformer for translation objects.
- * Mimics Laravel's JsonResource-style transformation.
- *
- * @param {Object} translation - The translation model instance.
- * @returns {Object|null} - Transformed object or null if input is invalid.
- */
-function TranslationResource(translation) {
-    if (!translation) return null;
+const BannerTranslation = require('../models/BannerTranslation');
+const BlogTranslation = require('../models/BlogTranslation');
+const FaqTranslation = require('../models/FaqTranslation');
+const ReferralTranslation = require('../models/ReferralTranslation');
+const ShopTranslation = require('../models/ShopTranslation');
+const Translation = require('../models/Translation'); // main translation model
 
-    return {
-        id: Number(translation.id),
-        locale: String(translation.locale),
-        title: translation.title ?? undefined,
-        short_desc: translation.short_desc ?? undefined,
-        description: translation.description ?? undefined,
-        button_text: translation.button_text ?? undefined,
-        address: translation.address ?? undefined,
-        question: translation.question ?? undefined,
-        answer: translation.answer ?? undefined,
-        faq: translation.faq ?? undefined
-    };
-}
+const formatTranslation = (translation) => {
+  if (!translation) return null;
 
-module.exports = TranslationResource;
+  return {
+    id: Number(translation.id),
+    locale: String(translation.locale),
+    title: translation.title ? String(translation.title) : undefined,
+    short_desc: translation.short_desc ? String(translation.short_desc) : undefined,
+    description: translation.description ? String(translation.description) : undefined,
+    button_text: translation.button_text ? String(translation.button_text) : undefined,
+    address: translation.address ? String(translation.address) : undefined,
+    question: translation.question ? String(translation.question) : undefined,
+    answer: translation.answer ? String(translation.answer) : undefined,
+    faq: translation.faq ? String(translation.faq) : undefined,
+  };
+};
+
+module.exports = {
+  formatTranslation,
+};

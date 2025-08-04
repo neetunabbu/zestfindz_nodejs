@@ -46,13 +46,10 @@ app.use('/api/v1/auth', userLoginRoutes);
 const restRoutes = require('./src/routes/api/v1/rest.routes');
 app.use('/api/v1/rest', restRoutes);
 
-// ✅ ADDED: seller base routes for setupSellerContext test
-const sellerBaseRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
-app.use('/api/v1/seller-base', sellerBaseRoutes);
-
-// seller Routes
+// ✅ ✅ FIXED: Load sellerApiRoutes before using again below
 const sellerApiRoutes = require('./src/routes/api/v1/Dashboard/seller/apiRoutes');
 app.use('/api/v1', sellerApiRoutes);
+
 // Admin Routes
 const adminApiRoutes = require('./src/routes/api/v1/Dashboard/admin/apiRoutes');
 app.use('/api/v1', adminApiRoutes);
@@ -69,8 +66,19 @@ app.get('/test', (req, res) => {
     res.json({ message: '✅ Test route is working!' });
 });
 
+// 404 handler
 app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
+});
+
+// ✅ Global error handler (must be last middleware)
+app.use((err, req, res, next) => {
+    console.error("🔥 ERROR:", err.stack || err.message || err);
+    res.status(500).json({
+        success: false,
+        message: "Something went wrong!",
+        error: err.message || err,
+    });
 });
 
 module.exports = app;

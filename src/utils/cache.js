@@ -1,5 +1,3 @@
-// src/utils/cache.js
-
 const cache = new Map();
 
 const set = (key, value, ttl = 3600) => {
@@ -12,12 +10,14 @@ const get = (key) => {
   if (!cached) return null;
 
   if (Date.now() > cached.expires) {
-    cache.delete(key); // remove expired
+    cache.delete(key);
     return null;
   }
 
   return cached.value;
 };
+
+const getCacheValue = get; // ✅ Alias
 
 const has = (key) => {
   return get(key) !== null;
@@ -34,6 +34,7 @@ const clear = () => {
 module.exports = {
   set,
   get,
+  getCacheValue, // ✅ Fix: Now it's exported properly
   has,
   del,
   clear
