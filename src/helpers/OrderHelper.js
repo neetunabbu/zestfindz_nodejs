@@ -1,5 +1,5 @@
 const { Sequelize, Op } = require('sequelize');
-const LoggableMixin = require('./loggableMixin');
+const Loggable = require('../Traits/Loggable');
 
 // Utility function to mimic Laravel's data_get
 const dataGet = (obj, key, defaultValue = null) => {
@@ -28,7 +28,7 @@ const OrderHelper = (sequelize) => {
   return {
     // Check shop delivery and calculate delivery fee
     async checkShopDelivery(shop, data, lang = 'en', deliveryFee = []) {
-      LoggableMixin.error(new Error(`[OrderHelper] checkShopDelivery called: shop_id=${shop?.id}, delivery_price_id=${data?.delivery_price_id}`));
+      Loggable.error(new Error(`[OrderHelper] checkShopDelivery called: shop_id=${shop?.id}, delivery_price_id=${data?.delivery_price_id}`));
 
       try {
         if (!shop?.id) {
@@ -36,39 +36,39 @@ const OrderHelper = (sequelize) => {
         }
 
         const deliveryPrice = await this.deliveryPrice(shop, parseInt(data?.delivery_price_id), lang);
-        LoggableMixin.error(new Error(`[OrderHelper] Delivery price calculated: ${JSON.stringify(deliveryPrice)}`));
+        Loggable.error(new Error(`[OrderHelper] Delivery price calculated: ${JSON.stringify(deliveryPrice)}`));
 
         deliveryFee.push(deliveryPrice);
-        LoggableMixin.error(new Error(`[OrderHelper] Added delivery fee: ${JSON.stringify(deliveryPrice)}`));
+        Loggable.error(new Error(`[OrderHelper] Added delivery fee: ${JSON.stringify(deliveryPrice)}`));
 
         return deliveryFee;
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in checkShopDelivery: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in checkShopDelivery: ${error.message}`));
         throw error;
       }
     },
 
     // Calculate delivery price for a shop
     async deliveryPrice(shop, deliveryPriceId, lang) {
-      LoggableMixin.error(new Error(`[OrderHelper] deliveryPrice called: shop_id=${shop.id}, delivery_price_id=${deliveryPriceId}`));
+      Loggable.error(new Error(`[OrderHelper] deliveryPrice called: shop_id=${shop.id}, delivery_price_id=${deliveryPriceId}`));
 
       try {
         const deliveryPrice = await DeliveryPriceModel.findOne({ where: { id: deliveryPriceId } });
-        LoggableMixin.error(new Error(`[OrderHelper] Fetched delivery price: ${JSON.stringify(deliveryPrice)}`));
+        Loggable.error(new Error(`[OrderHelper] Fetched delivery price: ${JSON.stringify(deliveryPrice)}`));
 
         return {
           shop_id: shop.id,
           price: deliveryPrice?.price || 0.0
         };
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in deliveryPrice: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in deliveryPrice: ${error.message}`));
         throw error;
       }
     },
 
     // Calculate actual quantity for stock
     async actualQuantity(stock, quantity, bonus = false) {
-      LoggableMixin.error(new Error(`[OrderHelper] actualQuantity called: stock_id=${stock?.id}, quantity=${quantity}, bonus=${bonus}`));
+      Loggable.error(new Error(`[OrderHelper] actualQuantity called: stock_id=${stock?.id}, quantity=${quantity}, bonus=${bonus}`));
 
       try {
         const product = await stock.getProduct();
@@ -85,14 +85,14 @@ const OrderHelper = (sequelize) => {
 
         return quantity > stock.quantity ? Math.max(stock.quantity, 0) : quantity;
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in actualQuantity: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in actualQuantity: ${error.message}`));
         throw error;
       }
     },
 
     // Set item parameters
     async setItemParams(item, stock) {
-      LoggableMixin.error(new Error(`[OrderHelper] setItemParams called: stock_id=${stock?.id}`));
+      Loggable.error(new Error(`[OrderHelper] setItemParams called: stock_id=${stock?.id}`));
 
       try {
         const quantity = parseInt(item.quantity || 0);
@@ -112,14 +112,14 @@ const OrderHelper = (sequelize) => {
           bonus: dataGet(item, 'bonus', false)
         };
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in setItemParams: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in setItemParams: ${error.message}`));
         throw error;
       }
     },
 
     // Prepare item based on bonus
     async prepareByBonus(item, stock, quantity) {
-      LoggableMixin.error(new Error(`[OrderHelper] prepareByBonus called: stock_id=${stock?.id}, quantity=${quantity}`));
+      Loggable.error(new Error(`[OrderHelper] prepareByBonus called: stock_id=${stock?.id}, quantity=${quantity}`));
 
       try {
         if (dataGet(item, 'bonus')) {
@@ -161,14 +161,14 @@ const OrderHelper = (sequelize) => {
 
         return item;
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in prepareByBonus: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in prepareByBonus: ${error.message}`));
         throw error;
       }
     },
 
     // Update stock and product statistics
     async updateStatCount(stock, actualQuantity, isIncrement = true) {
-      LoggableMixin.error(new Error(`[OrderHelper] updateStatCount called: stock_id=${stock?.id}, actualQuantity=${actualQuantity}, isIncrement=${isIncrement}`));
+      Loggable.error(new Error(`[OrderHelper] updateStatCount called: stock_id=${stock?.id}, actualQuantity=${actualQuantity}, isIncrement=${isIncrement}`));
 
       try {
         if (!stock) {
@@ -195,14 +195,14 @@ const OrderHelper = (sequelize) => {
           });
         }
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in updateStatCount: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in updateStatCount: ${error.message}`));
         throw error;
       }
     },
 
     // Update user order statistics
     async updateUserOrderStat(order) {
-      LoggableMixin.error(new Error(`[OrderHelper] updateUserOrderStat called: order_id=${order.id}`));
+      Loggable.error(new Error(`[OrderHelper] updateUserOrderStat called: order_id=${order.id}`));
 
       try {
         const orders = await OrderModel.findAll({
@@ -218,14 +218,14 @@ const OrderHelper = (sequelize) => {
           });
         }
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in updateUserOrderStat: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in updateUserOrderStat: ${error.message}`));
         throw error;
       }
     },
 
     // Check and apply coupon
     async checkCoupon(data, shopId, totalPrice, rate, couponPrice = [], deliveryFee = []) {
-      LoggableMixin.error(new Error(`[OrderHelper] checkCoupon called: shop_id=${shopId}, totalPrice=${totalPrice}, rate=${rate}`));
+      Loggable.error(new Error(`[OrderHelper] checkCoupon called: shop_id=${shopId}, totalPrice=${totalPrice}, rate=${rate}`));
 
       try {
         const name = dataGet(data, `coupon.${shopId}`);
@@ -261,14 +261,14 @@ const OrderHelper = (sequelize) => {
 
         return couponPrice;
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in checkCoupon: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in checkCoupon: ${error.message}`));
         return couponPrice;
       }
     },
 
     // Calculate coupon price
     async couponPrice(data, coupon, totalPrice, rate) {
-      LoggableMixin.error(new Error(`[OrderHelper] couponPrice called: coupon_name=${coupon.name}, totalPrice=${totalPrice}, rate=${rate}`));
+      Loggable.error(new Error(`[OrderHelper] couponPrice called: coupon_name=${coupon.name}, totalPrice=${totalPrice}, rate=${rate}`));
 
       try {
         const checkCoupon = await sequelize.models.OrderCoupon.findOne({
@@ -288,14 +288,14 @@ const OrderHelper = (sequelize) => {
 
         return couponPrice > 0 ? couponPrice * rate : 0;
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in couponPrice: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in couponPrice: ${error.message}`));
         return 0;
       }
     },
 
     // Check if phone is required for delivery
     async checkPhoneIfRequired(data, lang = 'en') {
-      LoggableMixin.error(new Error(`[OrderHelper] checkPhoneIfRequired called: user_id=${data?.user_id}, delivery_type=${data?.delivery_type}`));
+      Loggable.error(new Error(`[OrderHelper] checkPhoneIfRequired called: user_id=${data?.user_id}, delivery_type=${data?.delivery_type}`));
 
       try {
         const userId = dataGet(data, 'user_id');
@@ -327,7 +327,7 @@ const OrderHelper = (sequelize) => {
           throw new Error(`Error 117: Phone is required for delivery`);
         }
       } catch (error) {
-        LoggableMixin.error(new Error(`[OrderHelper] Error in checkPhoneIfRequired: ${error.message}`));
+        Loggable.error(new Error(`[OrderHelper] Error in checkPhoneIfRequired: ${error.message}`));
         throw error;
       }
     }

@@ -1,9 +1,8 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/db'); // PostgreSQL connection
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db'); 
 
-class CartDetail extends Model {}
-
-CartDetail.init(
+const CartDetail = sequelize.define(
+  'CartDetail',
   {
     id: {
       type: DataTypes.BIGINT,
@@ -29,8 +28,6 @@ CartDetail.init(
     },
   },
   {
-    sequelize,
-    modelName: 'CartDetail',
     tableName: 'cart_details',
     timestamps: true,
     createdAt: 'created_at',

@@ -1,10 +1,6 @@
-// D:\zestfindz_nodejs\src\requests\BaseRequest.js
 
 const { validationResult } = require('express-validator');
 
-/**
- * Middleware to handle validation errors
- */
 function validateRequest(req, res, next) {
   const errors = validationResult(req);
 

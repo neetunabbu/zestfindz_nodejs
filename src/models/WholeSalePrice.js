@@ -1,20 +1,8 @@
-// models/WholeSalePrice.js
-const { Model, DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  class WholeSalePrice extends Model {
-    static associate(models) {
-      // Each wholesale price belongs to one stock
-      WholeSalePrice.belongsTo(models.Stock, {
-        foreignKey: 'stock_id',
-        as: 'stock',
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
-      });
-    }
-  }
-
-  WholeSalePrice.init(
+  const WholeSalePrice = sequelize.define(
+    'WholeSalePrice',
     {
       id: {
         type: DataTypes.BIGINT,
@@ -50,8 +38,6 @@ module.exports = (sequelize) => {
       },
     },
     {
-      sequelize,
-      modelName: 'WholeSalePrice',
       tableName: 'whole_sale_prices',
       underscored: true,
       timestamps: true,
@@ -59,6 +45,15 @@ module.exports = (sequelize) => {
       updatedAt: 'updated_at',
     }
   );
+
+  WholeSalePrice.associate = function(models) {
+    WholeSalePrice.belongsTo(models.Stock, {
+      foreignKey: 'stock_id',
+      as: 'stock',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+  };
 
   return WholeSalePrice;
 };

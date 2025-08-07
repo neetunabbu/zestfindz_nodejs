@@ -22,7 +22,6 @@ const Loggable = {
       message: error.message,
       file: error.fileName || 'unknown',
       line: error.lineNumber || 'unknown'
-      // stack: error.stack // Uncomment to include stack trace, similar to Laravel's getTrace()
     });
   }
 };

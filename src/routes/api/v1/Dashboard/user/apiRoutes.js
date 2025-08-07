@@ -13,6 +13,7 @@ const ProfileController = require('../../../../../controllers/Api/v1/dashboard/u
 const UserActivityController = require('../../../../../controllers/Api/v1/dashboard/user/UserActivityController');
 const ProductController = require('../../../../../controllers/Api/v1/dashboard/user/ProductController');
 const AddReviewRequest = require('../../../../../requests/Order/AddReviewRequest');
+const CartController = require('../../../../../controllers/Api/v1/dashboard/user/CartController');
 
 function authMiddleware(req, res, next) {
   req.user = { id: 1 };
@@ -63,6 +64,10 @@ router.delete('/user/address', authMiddleware, UserAddressController.destroy);
 router.put('/user/address/active/:id',authMiddleware, UserAddressController.setActive);
 router.get('/user/address/active',authMiddleware, UserAddressController.getActive);
 router.get('/user/address/:id', UserAddressController.show);
+// Cart Routes Here
+router.get('/user/cart', authMiddleware,CartController.get);
+router.post('/user/cart',authMiddleware, CartController.store);
+router.delete('/user/cart/my',authMiddleware, CartController.myDelete);
 
 // router.use('/user', cartRoutes);
 

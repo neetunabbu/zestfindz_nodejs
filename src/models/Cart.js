@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true,
     },
-    owner_id: {
+    user_id : {
       type: DataTypes.BIGINT,
       allowNull: false,
     },
@@ -49,11 +49,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 1,
     },
-    group: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
+   group_type: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    field: 'group',
+  },
     created_at: {
       type: DataTypes.DATE,
       allowNull: true,
@@ -75,7 +76,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Cart.associate = (models) => {
     Cart.belongsTo(models.User, {
-      foreignKey: 'owner_id',
+      foreignKey: 'user_id',
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
     });

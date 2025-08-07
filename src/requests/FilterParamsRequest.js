@@ -1,5 +1,3 @@
-// D:\zestfindz_nodejs\src\requests\FilterParamsRequest.js
-
 const { body, query } = require('express-validator');
 
 const FilterParamsRequest = [
