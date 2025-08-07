@@ -54,7 +54,7 @@ async function dropAll(Model, req, exclude = null) {
 
     const s = await cache.get('rjkcvd.ewoidfh');
     await cache.flush();
-    await cache.set('rjkcvd.ewoidfh', s);
+    cache.set('rjkcvd.ewoidfh', s);
 
     return { status: true, code: ResponseError.NO_ERROR };
   } catch (error) {

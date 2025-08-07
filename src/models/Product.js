@@ -198,6 +198,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     as: 'translations',
   });
+    Product.hasMany(models.Review, {
+    foreignKey: 'reviewable_id',
+    constraints: false,
+    scope: {
+      reviewable_type: 'Product',
+    },
+    as: 'reviews',
+  });
+
   };
 
   return Product;

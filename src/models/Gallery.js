@@ -54,8 +54,17 @@ module.exports = (sequelize, DataTypes) => {
         name: 'galleries_loadable_type_index',
         fields: ['loadable_type']
       }
-    ]
+    ],
+    
   });
+  Gallery.associate = function (models) {
+// Optional: back reference to Review
+    Gallery.belongsTo(models.Review, {
+      foreignKey: 'loadable_id',
+      constraints: false,
+      as: 'review',
+    });
+  };
 
   return Gallery;
 };

@@ -1,5 +1,3 @@
-// D:\zestfindz_nodejs\src\requests\Order\AddReviewRequest.js
-
 const { body } = require('express-validator');
 
 const AddReviewRequest = () => {

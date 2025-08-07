@@ -1,72 +1,66 @@
-const BaseService = require('../core/BaseService');
 const { Product, Shop, Review, User, Gallery } = require('../../models');
-const { ResponseError } = require('../../helpers/ResponseError');
+const ResponseError  = require('../../helpers/ResponseError');
 
-class ProductReviewService extends BaseService {
-  constructor() {
-    super(Product);
+async function addReview(uuid, data, user) {
+
+  const product = await Product.findOne({
+    where: { uuid },
+    include: [{ model: Shop, as: 'shop' }],
+  });
+
+  if (!product) {
+    console.warn('❌ Product not found');
+    return { status: false, code: ResponseError.ERROR_404 };
   }
-
-  /**
-   * Add a review to a product
-   * @param {string} uuid
-   * @param {object} collection
-   * @returns {Promise<object>}
-   */
-  async addReview(uuid, collection) {
-    const product = await this.model.findOne({
-      where: { uuid },
-      include: [{ model: Shop, as: 'shop' }]
-    });
-
-    if (!product) {
-      return { status: false, code: ResponseError.ERROR_404 };
-    }
-
-    if (typeof product.addAssignReview === 'function') {
-      await product.addAssignReview(collection, product.shop);
-    } else {
-      // If addAssignReview is a Laravel-side helper, simulate it or implement it
-      console.warn('⚠️ product.addAssignReview not implemented.');
-    }
-
-    return {
-      status: true,
-      code: ResponseError.NO_ERROR,
-      data: product
-    };
+  if (!product.shop_id) {
+    return { status: false, code: ResponseError.ERROR_404, message: 'Shop not found for product' };
   }
+  // Create the review
+  await Review.create({
+    reviewable_type: 'Product',
+    reviewable_id: product.id,
+    assignable_type: 'Shop',
+    assignable_id: product.shop_id,
+    user_id: user.id,
+    rating: data.rating,
+    comment: data.comment || null,
+    img: data.images?.[0] || null,
+  });
 
-  /**
-   * Get all reviews of a product
-   * @param {string} uuid
-   * @returns {Promise<object>}
-   */
-  async reviews(uuid) {
-    const product = await this.model.findOne({
-      where: { uuid },
-      include: [
-        {
-          model: Review,
-          as: 'reviews',
-          include: [
-            { model: User, attributes: ['id', 'firstname', 'lastname', 'img', 'active'] },
-            { model: Gallery, as: 'galleries' }
-          ]
-        }
-      ]
-    });
-
-    if (!product) {
-      return { status: false, code: ResponseError.ERROR_404 };
-    }
-
-    return {
-      status: true,
-      code: ResponseError.NO_ERROR,
-      data: product.reviews
-    };
-  }
+  return {
+    status: true,
+    code: ResponseError.NO_ERROR,
+    message: 'Review added successfully',
+  };
 }
 
-module.exports = ProductReviewService;
+async function getProductReviews(uuid) {
+  const product = await Product.findOne({
+    where: { uuid },
+    include: [
+      {
+        model: Review,
+        as: 'reviews',
+        include: [
+          { model: User, attributes: ['id', 'firstname', 'lastname', 'img', 'active'], as: 'user' },
+          { model: Gallery, as: 'galleries' }
+        ]
+      }
+    ]
+  });
+
+  if (!product) {
+    return { status: false, code: ResponseError.ERROR_404 };
+  }
+
+  return {
+    status: true,
+    code: ResponseError.NO_ERROR,
+    data: product.reviews
+  };
+}
+
+module.exports = {
+  addReview,
+  getProductReviews,
+};

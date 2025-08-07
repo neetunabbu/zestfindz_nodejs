@@ -11,8 +11,8 @@ const UserProfileController = require('../../../../../controllers/Api/v1/dashboa
 const  UserAddressController  = require('../../../../../controllers/Api/v1/dashboard/user/UserAddressController');
 const ProfileController = require('../../../../../controllers/Api/v1/dashboard/user/ProfileController');
 const UserActivityController = require('../../../../../controllers/Api/v1/dashboard/user/UserActivityController');
-
-// const cartRoutes = require('./cart');
+const ProductController = require('../../../../../controllers/Api/v1/dashboard/user/ProductController');
+const AddReviewRequest = require('../../../../../requests/Order/AddReviewRequest');
 
 function authMiddleware(req, res, next) {
   req.user = { id: 1 };
@@ -35,6 +35,9 @@ router.post('/user/user-activities',authMiddleware, UserActivityController.store
 // Review Routes Here
 router.post('/user/shops/review/:id', ShopController.addReviews);
 router.post('/user/blogs/review/:id', BlogController.addReviews);
+// Product Reviews Routes
+router.post('/user/products/review/:uuid',authMiddleware , AddReviewRequest(), ProductController.addProductReview);
+router.get('/user/products/review/:uuid', ProductController.getProductReviews);
 // Digital File Routes Here
 // router.get('/user/digital-files',  DigitalFileController.index);
 // router.get('/user/my-digital-files',  DigitalFileController.myDigitalFiles);
